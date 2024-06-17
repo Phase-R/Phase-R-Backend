@@ -1,0 +1,36 @@
+# Ignore vendor directories
+vendor/
+
+# Ignore binary files
+*.exe
+*.dll
+*.so
+
+# Ignore build and temporary files
+*.test
+*.out
+*.prof
+
+# Ignore editor-specific files
+.idea/
+.vscode/
+
+# Ignore local development files
+*.log
+.DS_Store
+
+# Ignore test and coverage artifacts
+coverage.txt
+profile.out
+
+# Ignore documentation and README files
+README.md
+docs/
+
+# Ignore configuration files
+*.yml
+*.yaml
+
+# Ignore version control files
+.git/
+.gitignore
