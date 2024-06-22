@@ -3,6 +3,9 @@ module github.com/Phase-R/Phase-R-Backend/auth
 go 1.22.3
 
 require (
+	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240622150953-f16b774236bf
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/nrednav/cuid2 v1.0.0
 	gofr.dev v1.11.0
@@ -40,7 +43,6 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
