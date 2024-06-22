@@ -3,6 +3,7 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"github.com/Phase-R/Phase-R-Backend/auth/tools"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/lib/pq"
 	"github.com/nrednav/cuid2"
@@ -25,7 +26,7 @@ func (u user) CreateUser(ctx *gofr.Context, user *models.User) (*models.User, er
 
 	_, err := ctx.SQL.ExecContext(ctx,
 		"INSERT INTO user (CUID, Username,Fname, Lname, Email, Password, Age, Access) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-		id, user.Username, user.Fname, user.Lname, user.Email, user.Password, user.Age, user.Access)
+		id, user.Username, user.Fname, user.Lname, user.Email, tools.PwdSaltAndHash(user.Password), user.Age, user.Access)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == uniqueViolation {

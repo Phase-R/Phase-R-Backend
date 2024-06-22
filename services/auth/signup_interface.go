@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"gofr.dev/pkg/gofr"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
+	"gofr.dev/pkg/gofr"
 )
 
 type User interface {
