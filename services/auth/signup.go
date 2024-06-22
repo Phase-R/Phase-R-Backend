@@ -1,43 +1,8 @@
-// package auth
-
-// import (
-// 	"Phase-R-Backend/db/models"
-
-// 	"gofr.dev/examples/using-http-service/models"
-// 	"gofr.dev/pkg/errors"
-// 	"gofr.dev/pkg/gofr"
-// )
-
-// type user struct {}
-
-// func New() *user {
-// 	return *user{}
-// }
-
-// func (u *user) CreateUser(ctx *gofr.Context, user *models.User) (*models.User, error) {
-// 	var resp models.User
-
-// 	err := ctx.DB().QueryRowContext(ctx, "INSERT INTO users (Username, Fname, Lname, Email, Passsword, Age, Access) VALUES($1, $2, $3, $4, $5, $6, $7, $8)"+
-// 		" RETURNING UUID, Username, Fname, Lname, Email, Password, Age, Access", user.UUID, user.Username, user.Fname, user.Lname, user.Email, user.Password, user.Age, user.Access).Scan(
-// 		&resp.UUID, &resp.Username, &resp.Fname, &resp.Lname, &resp.Email, &resp.Password, &resp.Age, &resp.Access)
-// 	if err != nil {
-// 		return &models.User{}, errors.DB{Err: err}
-// 	}
-
-// 	return &resp, nil
-// }
-
-// func (u *user) FetchUser(ctx *gofr.Context, UUID string) (*models.User, error) {
-// 	var resp models.User
-
-// }
-
 package auth
 
 import (
 	"database/sql"
 	"errors"
-
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/lib/pq"
 	"github.com/nrednav/cuid2"
