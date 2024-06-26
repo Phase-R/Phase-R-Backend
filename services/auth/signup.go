@@ -3,6 +3,8 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"log"
+
 	"github.com/Phase-R/Phase-R-Backend/auth/tools"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/lib/pq"
@@ -10,13 +12,7 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
-type user struct{}
-
-func New() User {
-	return user{}
-}
-
-func (u user) CreateUser(ctx *gofr.Context, user *models.User) (*models.User, error) {
+func (user *models.User) CreateUser(ctx *gofr.Context, newuser *models.User) (*models.User, error) {
 	const uniqueViolation = "23505"
 
 	id := cuid2.Generate()
@@ -24,9 +20,15 @@ func (u user) CreateUser(ctx *gofr.Context, user *models.User) (*models.User, er
 		return nil, errors.New("CUID Generation failure.")
 	}
 
-	_, err := ctx.SQL.ExecContext(ctx,
-		"INSERT INTO user (CUID, Username,Fname, Lname, Email, Password, Age, Access) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-		id, user.Username, user.Fname, user.Lname, user.Email, tools.PwdSaltAndHash(user.Password), user.Age, user.Access)
+	hash, err := tools.PwdSaltAndHash(user.Password)
+	if err != nil {
+		log.Fatal("could not hash password", err)
+	}
+
+	_, err = ctx.SQL.ExecContext(ctx,
+		"INSERT INTO user (id, username,fname, lname, email, password, age, access) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		id, user.Username, user.Fname, user.Lname, user.Email, hash, user.Age, user.Access)
+
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == uniqueViolation {
@@ -38,11 +40,11 @@ func (u user) CreateUser(ctx *gofr.Context, user *models.User) (*models.User, er
 	return user, nil
 }
 
-func (u user) FetchUser(ctx *gofr.Context, CUID string) (*models.User, error) {
+func (user *models.User) FetchUser(ctx *gofr.Context, CUID string) (*models.User, error) {
 	var resp models.User
 
 	err := ctx.SQL.QueryRowContext(ctx,
-		"SELECT CUID, Username, Fname, Lname, Email, Password, Age, Access FROM users WHERE CUID=$1", CUID).Scan(&resp.CUID, &resp.Username, &resp.Fname, &resp.Lname, &resp.Email, &resp.Password, &resp.Age, &resp.Access)
+		"SELECT id, username, fname, lname, email, password, age, access FROM users WHERE id=?", CUID).Scan(&resp.ID, &resp.Username, &resp.Fname, &resp.Lname, &resp.Email, &resp.Password, &resp.Age, &resp.Access)
 	switch {
 	case err == sql.ErrNoRows:
 		return nil, err

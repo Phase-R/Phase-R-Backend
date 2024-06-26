@@ -3,12 +3,13 @@ module github.com/Phase-R/Phase-R-Backend/auth
 go 1.22.3
 
 require (
-	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240622150953-f16b774236bf
+	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240625145657-1f426eb61eaf
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/nrednav/cuid2 v1.0.0
 	gofr.dev v1.11.0
+	golang.org/x/crypto v0.24.0
 )
 
 require (
@@ -73,7 +74,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect

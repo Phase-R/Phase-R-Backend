@@ -22,6 +22,8 @@ github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7Oputl
 github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240622150953-f16b774236bf h1:FY5/Sd+lt2iLNL4ZAW38kWnVFQ9vRYSGc/+u0FpfGPM=
 github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240622150953-f16b774236bf/go.mod h1:6GBAsv7zbBBL/ZLjMLAMBD5GcSBPgMBnvZ9qTHdC5TM=
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240625145657-1f426eb61eaf h1:NPJMfJkFJ3f7TzvvSnyns5Bwe+hnkHzPi2PNuED2UCY=
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240625145657-1f426eb61eaf/go.mod h1:6GBAsv7zbBBL/ZLjMLAMBD5GcSBPgMBnvZ9qTHdC5TM=
 github.com/XSAM/otelsql v0.29.0 h1:pEw9YXXs8ZrGRYfDc0cmArIz9lci5b42gmP5+tA1Huc=
 github.com/XSAM/otelsql v0.29.0/go.mod h1:d3/0xGIGC5RVEE+Ld7KotwaLy6zDeaF3fLJHOPpdN2w=
 github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a h1:HbKu58rmZpUGpz5+4FfNmIU+FmZg2P3Xaj2v2bfNWmk=
