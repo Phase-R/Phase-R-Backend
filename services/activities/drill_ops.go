@@ -142,7 +142,7 @@ func UpdateActivity(ctx *gin.Context) {
 		return
 	}
 
-	update := res.Updates(changes)
+	update := db.Model(&drill).Where("id = ?", id).Updates(changes)
 	if update.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": update.Error.Error()})
 		return
