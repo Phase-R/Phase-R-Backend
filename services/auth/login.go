@@ -1,92 +1,112 @@
-package main
+package auth
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
+	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/dgrijalva/jwt-go"
-	// "github.com/gofiber/fiber/v2"
-    // "net/http"
-	// "github.com/Phase-R/Phase-R-Backend/db/models"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"gofr.dev/pkg/gofr"
-    // resTypes "gofr.dev/pkg/gofr/http/response"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var db *sql.DB
-func init_secret() string{
-	err := godotenv.Load("configs/.env")
-	if err != nil {
+var db *gorm.DB
+
+
+
+// func sync_database(){
+// 	db.AutoMigrate(&models.User{})
+// }
+
+
+
+
+func connect_to_database()*gorm.DB{
+	dbHost := os.Getenv("dbHost")
+    dbPort := os.Getenv("dbPort")
+    dbName := os.Getenv("dbName")
+    dbUser := os.Getenv("dbUser")
+    dbPassword := os.Getenv("dbPassword")
+    dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPassword, dbName, dbPort)
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{});if err!=nil{
+		log.Fatal("could not connect to db")
+	}
+	return db
+}
+
+func init(){
+	err:=godotenv.Load("configs/.env")
+
+	if err!=nil{
 		log.Fatal("Error loading .env file")
 	}
+}
 
-	secretKey:= os.Getenv("SECRET_KEY")
-    return secretKey
+func login(c *gin.Context) {
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if c.Bind(&body) != nil {
+		c.JSON(402, gin.H{
+			"error": "fail to read the body",
+		})
+		return
+	}
+	var user models.User
+	query:="SELECT * FROM users WHERE email = ?"
+	result := db.Raw(query, body.Email).Scan(&user)
+	if result.Error != nil || result.RowsAffected == 0 {
+		c.JSON(405, gin.H{
+			"error": "invalid email or password",
+		})
+		return
+	}
+	if user.Password != body.Password {
+		c.JSON(405, gin.H{
+			"error": "invalid email or password",
+		})
+		return
+	}
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    user.Email,
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	if err != nil {
+		c.JSON(401, gin.H{
+			"error": "token generation error",
+		})
+		return
+	}
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
+
+	c.JSON(200, gin.H{
+		"message": "login successful",
+	})
 }
 
 
 
 
-type LoginRequest struct {
-    Email    string `json:"email"`
-    Password string `json:"password"`
-}
+// func main(){
+// 	r:=gin.Default()
+// 	// sync_database()
+// 	r.GET("/ping",func(ctx *gin.Context) {
+// 		ctx.JSON(200,gin.H{
+// 			"message":"pong",
+// 		})
+// 	})
+// 	db=connect_to_database()
+// 	r.POST("/login",login)
 
-
-
-func login(ctx *gofr.Context) (interface{}, error) {
-    var loginRequest LoginRequest
-    if err := ctx.Bind(&loginRequest); err != nil {
-        ctx.Logger.Errorf("error in binding: %v", err)
-        return nil, err
-    }
-    if db == nil {
-        return nil, fmt.Errorf("database connection is not initialized")
-    }
-
-    var Email, password string
-    query := `SELECT email, password FROM "User" WHERE email = $1`
-    row := db.QueryRow(query, loginRequest.Email)
-    if err := row.Scan(&Email, &password); err != nil {
-        if err == sql.ErrNoRows {
-            return nil, fmt.Errorf("invalid email or password")
-        }
-        ctx.Logger.Errorf("error querying the database: %v", err)
-        return nil, err
-    }
-    if password != loginRequest.Password {
-        return nil, fmt.Errorf("invalid email or password")
-    }
-
-    claims:=jwt.NewWithClaims(jwt.SigningMethodHS256,jwt.StandardClaims{
-        Issuer: Email,
-        ExpiresAt: time.Now().Add(time.Hour*24).Unix(),
-    })
-    token,err:=claims.SignedString([]byte(init_secret()))
-    if err!=nil{
-        return nil,err
-    }
-    // TODO : COOKIE SESSION MANAGEMENT
-
-    // expiration := time.Now().Add(24 * time.Hour)
-    // cookie := http.Cookie{
-    //     Name:     "jwt",
-    //     Value:    token,
-    //     Expires:  expiration,
-    //     HttpOnly: true,
-    // }
-    // http.SetCookie(gofr.Responder.Respond(cookie), &cookie)
-    // http.SetCookie(gofr.Responder, &cookie)
-    return token,nil
-}
-
-func main(){
-
-}
-
-
-
-
+// 	r.Run()
+// }
