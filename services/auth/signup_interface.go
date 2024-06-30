@@ -6,5 +6,5 @@ import (
 
 type User interface {
 	CreateUser(ctx *gin.Context)
-	GetUser(ctx *gin.Context)
+	FetchUser(ctx *gin.Context)
 }
