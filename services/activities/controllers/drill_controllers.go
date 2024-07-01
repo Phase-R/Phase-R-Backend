@@ -1,55 +1,18 @@
-package main
+package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"github.com/joho/godotenv"
-
-	// "github.com/Phase-R/Phase-R-Backend/services/activities/configs"
 	"github.com/gin-gonic/gin"
 	"github.com/nrednav/cuid2"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
-// type Activity interface {
-// CreateActivity(ctx *gofr.Context, activity *models.Activity) (*models.Activity, error)
-// GetActivity(ctx *gofr.Context, UUID string) (*models.Activity, error)
-// GetActivitiesByType(ctx *gofr.Context) ([]models.Activity, error)
-// }
-
-func init() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-}
-
-func InitDB() *gorm.DB {
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := 5432
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=require", host, user, password, dbname, port)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
-	}
-	return db
-}
-
-func CreateActivity(ctx *gin.Context) {
-	const uniqueViolation = "23505"
-
+func CreateDrill(ctx *gin.Context) {
 	var drill models.Drill
 	if err := ctx.ShouldBindJSON(&drill); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -72,25 +35,27 @@ func CreateActivity(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Drill created successfully."})
 }
 
-func GetActivityByType(ctx *gin.Context) {
-	type_act := ctx.Param("type")
-	var drills []models.Drill
-	res := db.Raw("SELECT * FROM drills WHERE type_act = ?", type_act).Scan(&drills)
-	if res.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+func GetDrillsByType(ctx *gin.Context) {
+	type_id := ctx.Param("typeid")
+
+	var activityType models.ActivityType
+	err := db.Preload("Drills").First(&activityType, "id = ?", type_id)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	if len(drills) == 0 {
+	if len(activityType.Drills) == 0 {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "No drills found!"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": drills})
-	return
+	ctx.JSON(http.StatusOK, gin.H{"data": activityType.Drills})
+
 }
 
-func DeleteActivity(ctx *gin.Context) {
+func DeleteDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	res := db.Where("id = ?", id).First(&drill)
@@ -107,11 +72,11 @@ func DeleteActivity(ctx *gin.Context) {
 		return
 	}
 
-	successMsg := fmt.Sprintf("Deleted drill: %s successfully!", drill)
+	successMsg := fmt.Sprintf("Deleted drill: %s successfully!", drill.Title)
 	ctx.JSON(http.StatusOK, gin.H{"message": successMsg})
 }
 
-func GetActivity(ctx *gin.Context) {
+func GetDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	res := db.Raw("SELECT * FROM drills WHERE id = ?", id).Scan(&drill)
@@ -123,7 +88,7 @@ func GetActivity(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": drill})
 }
 
-func UpdateActivity(ctx *gin.Context) {
+func UpdateDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	var changes models.Drill
@@ -150,18 +115,4 @@ func UpdateActivity(ctx *gin.Context) {
 
 	successMsg := fmt.Sprintf("Updated drill with id: %s successfully!", id)
 	ctx.JSON(http.StatusOK, gin.H{"message": successMsg})
-}
-
-func main() {
-	r := gin.Default()
-	db = InitDB()
-	r.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
-	r.POST("/create_drill", CreateActivity)
-	r.GET("/get_drill/:id", GetActivity)
-	r.GET("/get_drills_by_type/:type", GetActivityByType)
-	r.PATCH("/update_drill/:id", UpdateActivity)
-	r.DELETE("/delete_drill/:id", DeleteActivity)
-	r.Run()
 }
