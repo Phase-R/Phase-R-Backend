@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func PwdSaltAndHash(password string) (hashedPassword string, err error) {
-	hashedPassword, err = hashy(password)
+func PwdSaltAndHash(password string) (string, error) {
+	hashedPassword, err := hashy(password)
 	if err != nil {
 		return "", err
 	}
