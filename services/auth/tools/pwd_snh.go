@@ -8,7 +8,7 @@ import (
 )
 
 func PwdSaltAndHash(password string) (hashedPassword string, err error) {
-	hashedPassword, err := hashy(password)
+	hashedPassword, err = hashy(password)
 	if err != nil {
 		return "", err
 	}
