@@ -1,7 +1,7 @@
-package auth
+package controllers
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,44 +9,26 @@ import (
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	// "github.com/Phase-R/Phase-R-Backend/services/auth/utils"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var db *gorm.DB	
 
 
 
-// func sync_database(){
-// 	db.AutoMigrate(&models.User{})
-// }
+func Init() {
+	err := godotenv.Load("configs/.env")
 
-
-
-
-func connect_to_database()*gorm.DB{
-	dbHost := os.Getenv("dbHost")
-    dbPort := os.Getenv("dbPort")
-    dbName := os.Getenv("dbName")
-    dbUser := os.Getenv("dbUser")
-    dbPassword := os.Getenv("dbPassword")
-    dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPassword, dbName, dbPort)
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{});if err!=nil{
-		log.Fatal("could not connect to db")
-	}
-	return db
-}
-
-func init(){
-	err:=godotenv.Load("configs/.env")
-
-	if err!=nil{
-		log.Fatal("Error loading .env file")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
 	}
 }
 
-func login(c *gin.Context) {
+
+
+func Login(c *gin.Context,db *gorm.DB) {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -73,6 +55,13 @@ func login(c *gin.Context) {
 		})
 		return
 	}
+	// match, err := utils.CompareHashAndPassword(user.Password, body.Password)
+	// if err != nil || !match {
+	// 	c.JSON(405, gin.H{
+	// 		"error": "invalid email or password",
+	// 	})
+	// 	return
+	// }
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    user.Email,
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
@@ -96,17 +85,3 @@ func login(c *gin.Context) {
 
 
 
-
-// func main(){
-// 	r:=gin.Default()
-// 	// sync_database()
-// 	r.GET("/ping",func(ctx *gin.Context) {
-// 		ctx.JSON(200,gin.H{
-// 			"message":"pong",
-// 		})
-// 	})
-// 	db=connect_to_database()
-// 	r.POST("/login",login)
-
-// 	r.Run()
-// }
