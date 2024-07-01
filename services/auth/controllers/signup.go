@@ -60,6 +60,36 @@ func FetchUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
+func UpdateUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var updatedUser models.User
+
+	if err := ctx.ShouldBindJSON(&updatedUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := db.Model(&models.User{}).Where("id = ?", id).Updates(updatedUser)
+	if res.Error != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "user updated successfully"})
+}
+
+func DeleteUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	res := db.Delete(&models.User{}, id)
+	if res.Error != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
+}
+
 //func Init() {
 //	err := godotenv.Load(".env")
 //	if err != nil {
