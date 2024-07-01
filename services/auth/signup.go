@@ -1,19 +1,20 @@
 package auth
 
-import (
-	"fmt"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"log"
-	"net/http"
-	"os"
+//package main
 
+import (
 	"github.com/Phase-R/Phase-R-Backend/auth/tools"
+	//"github.com/Phase-R/Phase-R-Backend/db/database"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
+	//"github.com/joho/godotenv"
 	"github.com/nrednav/cuid2"
-	"gorm.io/gorm"
+	//"gorm.io/gorm"
+	"log"
+	"net/http"
 )
+
+//var db *gorm.DB
 
 func CreateUser(ctx *gin.Context) {
 	const uniqueViolation = "23505"
@@ -59,37 +60,24 @@ func FetchUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-//func main() {
-//	r := gin.Default()
-//	r.GET("/ping", func(ctx *gin.Context) {
-//		ctx.JSON(http.StatusOK, gin.H{"yohoo": "pong"})
-//	})
-//	db = dbConn()
-//	r.POST("/user/new", CreateUser)
-//	r.GET("/user/fetch", FetchUser)
-//	r.Run()
+//func Init() {
+//	err := godotenv.Load(".env")
+//	if err != nil {
+//		log.Fatalf("Error loading .env file")
+//	}
 //}
 
-//var db *gorm.DB
-
-func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-}
-
-func dbConn() *gorm.DB {
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	passwd := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	port := 5432
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=enabled", host, user, passwd, dbname, port)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Database connection failure : %v", err)
-	}
-	return db
-}
+//func main() {
+//	Init()
+//	r := gin.Default()
+//	_ = database.InitDB()
+//	r.GET("/ping", func(c *gin.Context) {
+//		c.JSON(200, gin.H{"message": "pong"})
+//	})
+//	r.POST("/user/new", CreateUser)
+//	r.GET("/user/fetch", FetchUser)
+//	err := r.Run(":5432")
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//}
