@@ -16,4 +16,5 @@ type User struct {
 	Password string `json:"-" gorm:"not null"`
 	Age      int    `json:"age" gorm:"not null"`
 	Access   string `json:"access" gorm:"not null"` // free or premium
+	Verified bool   `json:"verified" gorm:"not null"`
 }
