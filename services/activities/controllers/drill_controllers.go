@@ -10,9 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+// var db *gorm.DB
 
-func CreateDrill(ctx *gin.Context) {
+func CreateDrill(ctx *gin.Context, db *gorm.DB) {
 	var drill models.Drill
 	if err := ctx.ShouldBindJSON(&drill); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -35,7 +35,7 @@ func CreateDrill(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Drill created successfully."})
 }
 
-func GetDrillsByType(ctx *gin.Context) {
+func GetDrillsByType(ctx *gin.Context, db *gorm.DB) {
 	type_id := ctx.Param("typeid")
 
 	var activityType models.ActivityType
@@ -55,7 +55,7 @@ func GetDrillsByType(ctx *gin.Context) {
 
 }
 
-func DeleteDrill(ctx *gin.Context) {
+func DeleteDrill(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	res := db.Where("id = ?", id).First(&drill)
@@ -76,7 +76,7 @@ func DeleteDrill(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": successMsg})
 }
 
-func GetDrill(ctx *gin.Context) {
+func GetDrill(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	res := db.Raw("SELECT * FROM drills WHERE id = ?", id).Scan(&drill)
@@ -88,7 +88,7 @@ func GetDrill(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": drill})
 }
 
-func UpdateDrill(ctx *gin.Context) {
+func UpdateDrill(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	var changes models.Drill
