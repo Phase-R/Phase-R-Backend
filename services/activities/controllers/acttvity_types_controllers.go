@@ -5,10 +5,11 @@ import (
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
 	"github.com/nrednav/cuid2"
+	"gorm.io/gorm"
 	"net/http"
 )
 
-func CreateActType(ctx *gin.Context) {
+func CreateActType(ctx *gin.Context, db *gorm.DB) {
 	var actType models.ActivityType
 	if err := ctx.ShouldBindJSON(&actType); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,7 +31,7 @@ func CreateActType(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"yohoo": "activity type created", "activity_type": actType})
 }
 
-func GetActType(ctx *gin.Context) {
+func GetActType(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var actType models.Activities
 	res := db.Raw("SELECT * FROM activitytypes WHERE id = ?", id).Scan(&actType)
@@ -42,7 +43,7 @@ func GetActType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"activity_types": actType})
 }
 
-func DeleteActType(ctx *gin.Context) {
+func DeleteActType(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var actType models.Activities
 	res := db.Where("id = ?", id).First(&actType)
@@ -64,7 +65,7 @@ func DeleteActType(ctx *gin.Context) {
 
 }
 
-func UpdateActType(ctx *gin.Context) {
+func UpdateActType(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var actType models.Activities
 	var chg models.Activities
