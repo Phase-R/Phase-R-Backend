@@ -7,6 +7,54 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+func comparePasswords(hashedPassword, password string) (bool, error) {
+	pos := -1
+	for i := 0; i < len(hashedPassword); i++ {
+		if hashedPassword[i] == '.' {
+			pos = i
+			break
+		}
+	}
+
+	if pos == -1 {
+		return false, fmt.Errorf("invalid hashed password format")
+	}
+
+	b64Salt := hashedPassword[:pos]
+	b64Hash := hashedPassword[pos+1:]
+
+	salt, err := base64.RawStdEncoding.DecodeString(b64Salt)
+	if err != nil {
+		return false, err
+	}
+
+	storedHash, err := base64.RawStdEncoding.DecodeString(b64Hash)
+	if err != nil {
+		return false, err
+	}
+
+	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+
+	if byteSliceComp(hash, storedHash) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func byteSliceComp(a, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	var result byte
+	for i := 0; i < len(a); i++ {
+		result |= a[i] ^ b[i]
+	}
+
+	return result == 0
+}
+
 func PwdSaltAndHash(password string) (string, error) {
 	hashedPassword, err := hashy(password)
 	if err != nil {
