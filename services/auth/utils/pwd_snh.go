@@ -1,4 +1,4 @@
-package tools
+package utils
 
 import (
 	"crypto/rand"
@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-func comparePasswords(hashedPassword, password string) (bool, error) {
+func ComparePasswords(hashedPassword, password string) (bool, error) {
 	pos := -1
 	for i := 0; i < len(hashedPassword); i++ {
 		if hashedPassword[i] == '.' {
