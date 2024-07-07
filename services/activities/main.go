@@ -20,11 +20,17 @@ func Init() {
 func main() {
 	Init()
 	r := gin.Default()
-	_ = database.InitDB()
-	r.POST("/create_drill", controllers.CreateDrill)
-	r.GET("/get_drill/:id", controllers.GetDrill)
-	r.GET("/get_drills_by_type/:type", controllers.GetDrillsByType)
-	r.PUT("/update_drill/:id", controllers.UpdateDrill)
-	r.DELETE("/delete_drill/:id", controllers.DeleteDrill)
+	db := database.InitDB()
+	// Drill endpoints
+	r.POST("/create_drill", controllers.CreateDrill(db))
+	r.GET("/get_drill/:id", controllers.GetDrill(db))
+	r.GET("/get_drills_by_type/:type", controllers.GetDrillsByType(db))
+	r.PUT("/update_drill/:id", controllers.UpdateDrill(db))
+	r.DELETE("/delete_drill/:id", controllers.DeleteDrill(db))
+	// Activity endpoints
+	r.POST("/create_activity", controllers.CreateActivity(db))
+	r.GET("/get_activity/:id", controllers.GetActivity(db))
+	r.PUT("/update_activity/:id", controllers.UpdateActivity(db))
+	r.DELETE("/delete_activity/:id", controllers.DeleteActivity(db))
 	r.Run()
 }
