@@ -1,20 +1,24 @@
-package auth
+//package auth
 
-//package main
+package main
 
 import (
 	"github.com/Phase-R/Phase-R-Backend/auth/tools"
-	//"github.com/Phase-R/Phase-R-Backend/db/database"
+	"gorm.io/gorm"
+
+	"github.com/joho/godotenv"
+
+	"github.com/Phase-R/Phase-R-Backend/db/database"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
-	//"github.com/joho/godotenv"
+
+	"github.com/joho/godotenv"
 	"github.com/nrednav/cuid2"
-	//"gorm.io/gorm"
 	"log"
 	"net/http"
 )
 
-//var db *gorm.DB
+var db *gorm.DB
 
 func CreateUser(ctx *gin.Context) {
 	const uniqueViolation = "23505"
@@ -90,24 +94,24 @@ func DeleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
 
-//func Init() {
-//	err := godotenv.Load(".env")
-//	if err != nil {
-//		log.Fatalf("Error loading .env file")
-//	}
-//}
+func Init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+}
 
-//func main() {
-//	Init()
-//	r := gin.Default()
-//	_ = database.InitDB()
-//	r.GET("/ping", func(c *gin.Context) {
-//		c.JSON(200, gin.H{"message": "pong"})
-//	})
-//	r.POST("/user/new", CreateUser)
-//	r.GET("/user/fetch", FetchUser)
-//	err := r.Run(":5432")
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//}
+func main() {
+	Init()
+	r := gin.Default()
+	db = database.InitDB()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+	r.POST("/user/new", CreateUser)
+	r.GET("/user/fetch", FetchUser)
+	err := r.Run(":5432")
+	if err != nil {
+		log.Fatal(err)
+	}
+}

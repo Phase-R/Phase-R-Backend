@@ -10,9 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-func CreateActivity(ctx *gin.Context) {
+func CreateActivity(ctx *gin.Context, db *gorm.DB) {
 	var activity models.Activities
 	if err := ctx.ShouldBindJSON(&activity); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,7 +28,7 @@ func CreateActivity(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "activity created successfully", "activity": activity})
 }
 
-func GetActivity(ctx *gin.Context) {
+func GetActivity(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var activity models.Activities
 	err := db.Preload("Types").First(&activity, "id = ?", id).Error
@@ -47,7 +45,7 @@ func GetActivity(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": activity})
 }
 
-func UpdateActivity(ctx *gin.Context) {
+func UpdateActivity(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var changes models.Activities
 
@@ -72,7 +70,7 @@ func UpdateActivity(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Updated activity with ID: %s successfully", id), "activity": activity})
 }
 
-func DeleteActivity(ctx *gin.Context) {
+func DeleteActivity(ctx *gin.Context, db *gorm.DB) {
 	id := ctx.Param("id")
 	var activity models.Activities
 	res := db.Where("id = ?", id).First(&activity)
