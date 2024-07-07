@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Phase-R/Phase-R-Backend/activities/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
 	"github.com/nrednav/cuid2"
-	"gorm.io/gorm"
 )
 
-// var db *gorm.DB
-
-func CreateDrill(ctx *gin.Context, db *gorm.DB) {
+func CreateDrill(ctx *gin.Context) {
 	var drill models.Drill
 	if err := ctx.ShouldBindJSON(&drill); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -26,7 +24,7 @@ func CreateDrill(ctx *gin.Context, db *gorm.DB) {
 
 	drill.ID = id
 
-	res := db.Create(&drill)
+	res := db.DB.Create(&drill)
 	if res.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
 		return
@@ -35,11 +33,11 @@ func CreateDrill(ctx *gin.Context, db *gorm.DB) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Drill created successfully."})
 }
 
-func GetDrillsByType(ctx *gin.Context, db *gorm.DB) {
+func GetDrillsByType(ctx *gin.Context) {
 	type_id := ctx.Param("typeid")
 
 	var activityType models.ActivityType
-	err := db.Preload("Drills").First(&activityType, "id = ?", type_id)
+	err := db.DB.Preload("Drills").First(&activityType, "id = ?", type_id)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -55,10 +53,10 @@ func GetDrillsByType(ctx *gin.Context, db *gorm.DB) {
 
 }
 
-func DeleteDrill(ctx *gin.Context, db *gorm.DB) {
+func DeleteDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
-	res := db.Where("id = ?", id).First(&drill)
+	res := db.DB.Where("id = ?", id).First(&drill)
 
 	if res.Error != nil {
 		errorMsg := fmt.Sprintf("No drills with id: %s were found!", id)
@@ -66,7 +64,7 @@ func DeleteDrill(ctx *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	del := db.Delete(&drill)
+	del := db.DB.Delete(&drill)
 	if del.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"Error": del.Error.Error()})
 		return
@@ -76,10 +74,10 @@ func DeleteDrill(ctx *gin.Context, db *gorm.DB) {
 	ctx.JSON(http.StatusOK, gin.H{"message": successMsg})
 }
 
-func GetDrill(ctx *gin.Context, db *gorm.DB) {
+func GetDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
-	res := db.Raw("SELECT * FROM drills WHERE id = ?", id).Scan(&drill)
+	res := db.DB.Where("id = ?", id).First(&drill)
 	if res.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
 		return
@@ -88,7 +86,7 @@ func GetDrill(ctx *gin.Context, db *gorm.DB) {
 	ctx.JSON(http.StatusOK, gin.H{"data": drill})
 }
 
-func UpdateDrill(ctx *gin.Context, db *gorm.DB) {
+func UpdateDrill(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var drill models.Drill
 	var changes models.Drill
@@ -99,7 +97,7 @@ func UpdateDrill(ctx *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	res := db.Where("id = ?", id).First(&drill)
+	res := db.DB.Where("id = ?", id).First(&drill)
 
 	if res.Error != nil {
 		notFoundMsg := fmt.Sprintf("No drills with the id: %s were found!", id)
@@ -107,7 +105,7 @@ func UpdateDrill(ctx *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	update := db.Model(&drill).Where("id = ?", id).Updates(changes)
+	update := db.DB.Model(&drill).Where("id = ?", id).Updates(changes)
 	if update.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": update.Error.Error()})
 		return

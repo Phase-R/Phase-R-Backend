@@ -1,36 +1,25 @@
 package main
 
 import (
-	"log"
-
 	"github.com/Phase-R/Phase-R-Backend/activities/controllers"
-	"github.com/Phase-R/Phase-R-Backend/db/database"
+	"github.com/Phase-R/Phase-R-Backend/activities/db"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
-func Init() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-}
-
 func main() {
-	Init()
 	r := gin.Default()
-	db := database.InitDB()
-	// Drill endpoints
-	r.POST("/create_drill", controllers.CreateDrill(db))
-	r.GET("/get_drill/:id", controllers.GetDrill(db))
-	r.GET("/get_drills_by_type/:type", controllers.GetDrillsByType(db))
-	r.PUT("/update_drill/:id", controllers.UpdateDrill(db))
-	r.DELETE("/delete_drill/:id", controllers.DeleteDrill(db))
+
+	r.Use(cors.Default())
+	db.Init()
+	r.GET("/get_drill/:id", controllers.GetDrill)
+	r.GET("/get_drills_by_type/:type", controllers.GetDrillsByType)
+	r.PUT("/update_drill/:id", controllers.UpdateDrill)
+	r.DELETE("/delete_drill/:id", controllers.DeleteDrill)
 	// Activity endpoints
-	r.POST("/create_activity", controllers.CreateActivity(db))
-	r.GET("/get_activity/:id", controllers.GetActivity(db))
-	r.PUT("/update_activity/:id", controllers.UpdateActivity(db))
-	r.DELETE("/delete_activity/:id", controllers.DeleteActivity(db))
+	r.POST("/create_activity", controllers.CreateActivity)
+	r.GET("/get_activity/:id", controllers.GetActivity)
+	r.PUT("/update_activity/:id", controllers.UpdateActivity)
+	r.DELETE("/delete_activity/:id", controllers.DeleteActivity)
 	r.Run()
 }
