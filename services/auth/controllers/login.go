@@ -1,49 +1,21 @@
-package auth
+package controllers
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
-
+	"github.com/Phase-R/Phase-R-Backend/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
+	"github.com/Phase-R/Phase-R-Backend/auth/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"net/http"
 )
 
-var db *gorm.DB
 
-// func sync_database(){
-// 	db.AutoMigrate(&models.User{})
-// }
 
-func connect_to_database() *gorm.DB {
-	dbHost := os.Getenv("dbHost")
-	dbPort := os.Getenv("dbPort")
-	dbName := os.Getenv("dbName")
-	dbUser := os.Getenv("dbUser")
-	dbPassword := os.Getenv("dbPassword")
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Shanghai", dbHost, dbUser, dbPassword, dbName, dbPort)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("could not connect to db")
-	}
-	return db
-}
-
-func init() {
-	err := godotenv.Load("configs/.env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
-
-func login(c *gin.Context) {
+func Login(c *gin.Context) {
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -56,17 +28,24 @@ func login(c *gin.Context) {
 		return
 	}
 	var user models.User
-	query := "SELECT * FROM users WHERE email = ?"
-	result := db.Raw(query, body.Email).Scan(&user)
-	if result.Error != nil || result.RowsAffected == 0 {
+	result := db.DB.Where("email = ?", body.Email).First(&user)
+	if result.Error != nil{
 		c.JSON(405, gin.H{
 			"error": "invalid email or password",
 		})
 		return
 	}
-	if user.Password != body.Password {
-		c.JSON(405, gin.H{
-			"error": "invalid email or password",
+	// if user.Password != body.Password {
+	// 	c.JSON(405, gin.H{
+	// 		"error": "invalid email or password",
+	// 	})
+	// 	return
+	// }
+	match, err := utils.ComparePasswords(user.Password, body.Password)
+	log.Println(user.Password,body.Password)
+	if err != nil || !match {
+		c.JSON(404, gin.H{
+			"error": "invalid email or password compare",
 		})
 		return
 	}
@@ -84,23 +63,9 @@ func login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
+	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",
 	})
-}
-
-func main() {
-	r := gin.Default()
-	// sync_database()
-	r.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	db = connect_to_database()
-	r.POST("/login", login)
-
-	r.Run()
 }
