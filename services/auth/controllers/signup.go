@@ -47,7 +47,7 @@ func CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	err := db.DB.Where("email = ?", newUser.Email).First(&newUser).Error
+	err := db.DB.Where("email = ? OR username = ?", newUser.Email, newUser.Username).First(&newUser).Error
 	if err == nil {
 		ctx.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 	}
@@ -65,6 +65,8 @@ func CreateUser(ctx *gin.Context) {
 	}
 
 	newUser.Password = hash
+	newUser.Access = "free"
+	newUser.Verified = false
 
 	res := db.DB.Create(&newUser)
 	if res.Error != nil {
