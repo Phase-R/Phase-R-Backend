@@ -164,7 +164,7 @@ func sendEmail(to string, token string) {
 	m.SetHeader("From", "email@gmail.com")
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "Password Reset")
-	m.SetBody("text/html", fmt.Sprintf("Click here">, token))
+	m.SetBody("text/html", fmt.Sprintf("Click <a href=\"http://localhost:3000/user/reset-password?token=%s\">here</a> to reset your password.", token))
 
 	d := gomail.NewDialer("smtp.example.com", 587, "your-email@example.com", "your-email-password")
 
