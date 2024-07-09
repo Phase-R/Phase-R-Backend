@@ -3,16 +3,39 @@ package controllers
 // package main
 
 import (
-	"github.com/Phase-R/Phase-R-Backend/auth/utils"
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
-	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"github.com/gin-gonic/gin"
-	"github.com/nrednav/cuid2"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
+
+	"github.com/Phase-R/Phase-R-Backend/auth/db"
+	"github.com/Phase-R/Phase-R-Backend/auth/utils"
+	"github.com/Phase-R/Phase-R-Backend/db/models"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/nrednav/cuid2"
 )
 
+func getJWTSecretKey() string {
+	return os.Getenv("JWT_SECRET")
+}
 
+func generateVerificationToken(userID string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": userID,
+		"ttl": time.Now().Add(time.Minute * 5).Unix(),
+	})
+
+	jwtSecret := getJWTSecretKey()
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("token: ", tokenString)
+
+	return tokenString, nil
+}
 
 func CreateUser(ctx *gin.Context) {
 	const uniqueViolation = "23505"
@@ -42,9 +65,23 @@ func CreateUser(ctx *gin.Context) {
 	if res.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}	
+
+	// send verification email
+	token, err := generateVerificationToken(newUser.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate verification token"})
+		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"yohoo": "new user created."})
+	// send email
+	err = SendVerificationEmail(newUser.Email, token)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send verification email"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Verification email sent."})
 }
 
 func FetchUser(ctx *gin.Context) {
