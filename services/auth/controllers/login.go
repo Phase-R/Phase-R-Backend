@@ -2,18 +2,17 @@ package controllers
 
 import (
 	// "fmt"
-	"log"
+
+	"net/http"
 	"os"
 	"time"
+
 	"github.com/Phase-R/Phase-R-Backend/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"github.com/Phase-R/Phase-R-Backend/auth/utils"
+	"github.com/alexedwards/argon2id"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
-
-
 
 func Login(c *gin.Context) {
 	var body struct {
@@ -29,7 +28,7 @@ func Login(c *gin.Context) {
 	}
 	var user models.User
 	result := db.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error != nil{
+	if result.Error != nil {
 		c.JSON(405, gin.H{
 			"error": "invalid email or password",
 		})
@@ -41,8 +40,8 @@ func Login(c *gin.Context) {
 	// 	})
 	// 	return
 	// }
-	match, err := utils.ComparePasswords(user.Password, body.Password)
-	log.Println(user.Password,body.Password)
+
+	match, err := argon2id.ComparePasswordAndHash(body.Password, user.Password)
 	if err != nil || !match {
 		c.JSON(404, gin.H{
 			"error": "invalid email or password compare",
@@ -63,7 +62,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
+	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",

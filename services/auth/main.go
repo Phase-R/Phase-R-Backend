@@ -23,4 +23,5 @@ func main() {
 	r.POST("/user/login", controllers.Login)
 	r.GET("/verify", controllers.VerifyEmail)
 	r.Run()
+
 }

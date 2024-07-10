@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"fmt"
-		"net/http"
+	"net/http"
 	"os"
 	"time"
 
@@ -39,7 +39,7 @@ func SendVerificationEmail(emailTo string, token string) error {
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)
-	m.SetHeader("To", emailTo)				
+	m.SetHeader("To", emailTo)
 	m.SetHeader("Subject", "Verify your email")
 	m.SetBody("text/html", body)
 
@@ -79,12 +79,12 @@ func VerifyEmail(ctx *gin.Context) {
 
 	fmt.Println("Claims user id: ", claims["userID"])
 
-	var user models.User;
+	var user models.User
 	db.DB.Raw("SELECT * FROM users WHERE id = ?", claims["userID"]).Scan(&user)
 
 	if user.ID == "" {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return			
+		return
 	}
 
 	if user.Verified {
