@@ -24,7 +24,7 @@ func getJWTSecretKey() string {
 func generateVerificationToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
-		"ttl": time.Now().Add(time.Minute * 5).Unix(),
+		"ttl":    time.Now().Add(time.Minute * 5).Unix(),
 	})
 
 	jwtSecret := getJWTSecretKey()
@@ -42,6 +42,16 @@ func CreateUser(ctx *gin.Context) {
 
 	var newUser models.User
 
+	if err := ctx.ShouldBindJSON(&newUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := db.DB.Where("email = ? OR username = ?", newUser.Email, newUser.Username).First(&newUser).Error
+	if err == nil {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
+	}
+
 	id := cuid2.Generate()
 	if id == "" {
 		return
@@ -55,17 +65,14 @@ func CreateUser(ctx *gin.Context) {
 	}
 
 	newUser.Password = hash
-
-	if err := ctx.ShouldBindJSON(&newUser); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	newUser.Access = "free"
+	newUser.Verified = false
 
 	res := db.DB.Create(&newUser)
 	if res.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}	
+	}
 
 	// send verification email
 	token, err := generateVerificationToken(newUser.ID)
