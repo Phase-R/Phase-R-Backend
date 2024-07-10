@@ -12,10 +12,8 @@ import (
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/gomail.v2"
+	gomail "gopkg.in/gomail.v2"
 )
-
-
 
 func Login(c *gin.Context) {
 	var body struct {
@@ -31,7 +29,7 @@ func Login(c *gin.Context) {
 	}
 	var user models.User
 	result := db.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error != nil{
+	if result.Error != nil {
 		c.JSON(405, gin.H{
 			"error": "invalid email or password",
 		})
@@ -44,7 +42,7 @@ func Login(c *gin.Context) {
 	// 	return
 	// }
 	match, err := utils.ComparePasswords(user.Password, body.Password)
-	log.Println(user.Password,body.Password)
+	log.Println(user.Password, body.Password)
 	if err != nil || !match {
 		c.JSON(404, gin.H{
 			"error": "invalid email or password compare",
@@ -65,13 +63,14 @@ func Login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
+	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",
 	})
 }
 
+// ForgotPassword function
 // ForgotPassword function
 func ForgotPassword(c *gin.Context) {
 	var body struct {
@@ -90,23 +89,20 @@ func ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	// Generate a reset token
-	resetToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    user.Email,
-		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
-	})
-	token, err := resetToken.SignedString([]byte(os.Getenv("RESET_PASSWORD_SECRET")))
+	// Generate OTP for user
+	otp, err := GenerateOTP(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate reset token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate OTP"})
 		return
 	}
 
-	// Send reset token via email
-	sendEmail(user.Email, token)
+	// Send OTP via email
+	sendEmail(user.Email, otp)
 
-	c.JSON(http.StatusOK, gin.H{"message": "password reset email sent"})
+	c.JSON(http.StatusOK, gin.H{"message": "password reset OTP sent"})
 }
 
+// ResetPassword function
 // ResetPassword function
 func ResetPassword(c *gin.Context) {
 	var body struct {
@@ -141,15 +137,21 @@ func ResetPassword(c *gin.Context) {
 			return
 		}
 
+		// Verify OTP
+		// if !utils.VerifyPassword(user.OTP, body.NewPassword) {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid OTP"})
+		// 	return
+		// }
+
 		// Hash the new password
-		hash, err := utils.PwdSaltAndHash(body.NewPassword)
+		hashedPassword, err := utils.PwdSaltAndHash(body.NewPassword)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not hash password"})
 			return
 		}
 
-		// Update the user's password
-		user.Password = hash
+		// Update user's password
+		user.Password = hashedPassword
 		db.DB.Save(&user)
 
 		c.JSON(http.StatusOK, gin.H{"message": "password reset successful"})
@@ -158,15 +160,18 @@ func ResetPassword(c *gin.Context) {
 	}
 }
 
-//random sendEmail function i found online, delete if needed
 func sendEmail(to string, token string) {
+	from := os.Getenv("EMAIL_FROM")
+	password := os.Getenv("MAIL_PASS")
+	fmt.Println(from)
+	fmt.Println(password)
 	m := gomail.NewMessage()
-	m.SetHeader("From", "email@gmail.com")
+	m.SetHeader("From", from)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "Password Reset")
-	m.SetBody("text/html", fmt.Sprintf("Click <a href=\"http://localhost:3000/user/reset-password?token=%s\">here</a> to reset your password.", token))
+	m.SetBody("text/html", fmt.Sprintf("<a href='http://localhost:8080/user/reset-password-test'>Click here</a>", token))
 
-	d := gomail.NewDialer("smtp.example.com", 587, "your-email@example.com", "your-email-password")
+	d := gomail.NewDialer("smtp.gmail.com", 587, from, password)
 
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("could not send email: ", err)
