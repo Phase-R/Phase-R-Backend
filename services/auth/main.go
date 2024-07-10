@@ -24,4 +24,5 @@ func main() {
 	r.POST("/user/forgot-password", controllers.ForgotPassword)
 	r.POST("/user/reset-password", controllers.ResetPassword)
 	r.Run()
+
 }
