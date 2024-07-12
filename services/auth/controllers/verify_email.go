@@ -17,12 +17,6 @@ func SendVerificationEmail(emailTo string, token string) error {
 	password := os.Getenv("MAIL_PASS")
 	from := os.Getenv("EMAIL_FROM")
 
-	// print all info to verify
-	fmt.Println("Email to: ", emailTo)
-	fmt.Println("Token: ", token)
-	fmt.Println("Password: ", password)
-	fmt.Println("From: ", from)
-
 	header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
 	if err != nil {
 		fmt.Println("Error reading header file: ", err)
@@ -77,7 +71,7 @@ func VerifyEmail(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Claims user id: ", claims["userID"])
+	// fmt.Println("Claims user id: ", claims["userID"])
 
 	var user models.User
 	db.DB.Raw("SELECT * FROM users WHERE id = ?", claims["userID"]).Scan(&user)
@@ -99,5 +93,18 @@ func VerifyEmail(ctx *gin.Context) {
 		return
 	}
 
+
+	GenerateTokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": user.Email,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+	GenerateTokenstring, err := GenerateTokenClaims.SignedString([]byte(getJWTSecretKey()))
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to generate new JWT token"})
+		return
+	}
+
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("verified", GenerateTokenstring, 3600*24*30,"","", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Email successfully verified"})
 }
