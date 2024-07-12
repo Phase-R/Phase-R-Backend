@@ -1,50 +1,45 @@
 package controllers
 
 import (
-	"fmt"
-	"math/rand"
-	"net/http"
-
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
-	"github.com/Phase-R/Phase-R-Backend/auth/utils"
-	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"github.com/gin-gonic/gin"
+    "fmt"
+    "math/rand"
+    "net/http"
+    "github.com/Phase-R/Phase-R-Backend/auth/db"
+    "github.com/Phase-R/Phase-R-Backend/auth/utils"
+    "github.com/Phase-R/Phase-R-Backend/db/models"
+    "github.com/gin-gonic/gin"
 )
 
-// GenerateOTP handles the OTP generation and emailing process
-func GenerateOTP(c *gin.Context) {
-	var body struct {
-		Email string `json:"email"`
-	}
+func GenerateOTP(c *gin.Context) (string, error) {
+    var body struct {
+        Email string `json:"email"`
+    }
 
-	if c.Bind(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-		return
-	}
+    if c.Bind(&body) != nil {
+        return "", fmt.Errorf("invalid request body")
+    }
 
-	var user models.User
-	result := db.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "email not found"})
-		return
-	}
+    var user models.User
+    result := db.DB.Where("email = ?", body.Email).First(&user)
+    if result.Error != nil {
+        return "", fmt.Errorf("email not found")
+    }
 
-	// Generate a 6-digit OTP
-	otp := rand.Intn(1000000)
+    // Generate a 6-digit OTP
+    otp := rand.Intn(1000000)
 
-	// Hash the OTP using the salted hash function
-	hashedOTP, err := utils.PwdSaltAndHash(fmt.Sprintf("%d", otp))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash OTP"})
-		return
-	}
+    // Hash the OTP using the salted hash function
+    hashedOTP, err := utils.PwdSaltAndHash(fmt.Sprintf("%d", otp))
+    if err != nil {
+        return "", fmt.Errorf("failed to hash OTP")
+    }
 
-	// Store the hashed OTP
-	user.OTP = hashedOTP
-	db.DB.Save(&user)
+    // Store the hashed OTP
+    user.OTP = hashedOTP
 
-	// Send plain OTP via email
-	sendEmail(user.Email, fmt.Sprintf("%06d", otp))
+    // Save the user with the new OTP
+    db.DB.Save(&user)
 
-	c.JSON(http.StatusOK, gin.H{"message": "password reset OTP sent"})
+    // Return the plain OTP for sending via email
+    return fmt.Sprintf("%06d", otp), nil
 }

@@ -7,7 +7,6 @@ toolchain go1.22.5
 require (
 	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240707143909-af86cc29bb97
 	github.com/alexedwards/argon2id v1.0.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
