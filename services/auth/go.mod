@@ -1,11 +1,10 @@
-module github.com/Phase-R/Phase-R-Backend/auth
+module github.com/Phase-R/Phase-R-Backend/services/auth
 
 go 1.22.3
 
 toolchain go1.22.5
 
 require (
-	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240707143909-af86cc29bb97
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
@@ -18,6 +17,7 @@ require (
 )
 
 require (
+	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
@@ -55,3 +55,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.9 // indirect
 )
+
+replace github.com/Phase-R/Phase-R-Backend/db => ../../db

@@ -1,6 +1,15 @@
 package utils
 
-/*func ComparePasswords(hashedPassword, password string) (bool, error) {
+import (
+	"fmt"
+	"encoding/base64"
+	"golang.org/x/crypto/argon2"
+	"math/rand"
+)
+
+
+
+func ComparePasswords(hashedPassword, password string) (bool, error) {
 	pos := -1
 	for i := 0; i < len(hashedPassword); i++ {
 		if hashedPassword[i] == '.' {
@@ -76,4 +85,4 @@ func salted(size int) ([]byte, error) {
 		return nil, err
 	}
 	return salt, nil
-} */
+} 

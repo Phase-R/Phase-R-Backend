@@ -1,22 +1,16 @@
 package controllers
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"time"
-
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
-	"github.com/Phase-R/Phase-R-Backend/auth/utils"
-
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"errors"
-	"net/http"
-
-	"github.com/alexedwards/argon2id"
-	"github.com/gin-gonic/gin"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/utils"
 	"github.com/golang-jwt/jwt/v5"
-	gomail "gopkg.in/gomail.v2"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"errors"
+	"github.com/alexedwards/argon2id"
 )
 
 func ParseToken(tokenString string) (*jwt.Token, error) {
@@ -61,7 +55,7 @@ func Login(c *gin.Context) {
 	}
 	var user models.User
 	result := db.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error != nil {
+	if result.Error != nil{
 		c.JSON(405, gin.H{
 			"error": "invalid email or password (email)",
 		})
@@ -81,10 +75,12 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"iss": user.Email,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
+	
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -94,7 +90,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
+	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",
@@ -102,91 +98,39 @@ func Login(c *gin.Context) {
 }
 
 func ForgotPassword(c *gin.Context) {
-    var body struct {
-        Email string `json:"email"`
-    }
+	var body struct {
+		Email string `json:"email"`
+	}
 
-    if c.Bind(&body) != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-        return
-    }
+	if c.Bind(&body) != nil {
+		c.JSON(400, gin.H{"error": "Invalid request body"})
+		return
+	}
 
-    // Generate OTP
-    otp, err := GenerateOTP(c)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	var user models.User 
+	result := db.DB.Where("email = ?", body.Email).First(&user)
+	if result.Error != nil {
+		c.JSON(405, gin.H{"error": "Email not found, please sign up"})
+		return
+	}
 
-    // Generate a new JWT token
-    claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-        Issuer:    body.Email,
-        ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // Token valid for 1 hour
-    })
+	otp, hashedOTP, err := utils.GenerateOTP()
+	if err!=nil {
+		c.JSON(401, gin.H{"error":"error in hashing otp"})
+	}
 
-    token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
-        return
-    }
+	user.otp= hashedOTP
+	res := db.DB.Model(&models.User{}).Where("email = ?", body.Email).Update("otp", hashedOTP)
+	if res.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+		return
+	}
 
-    // Send OTP via email
-    sendEmail(body.Email, otp)
+	err = sendEmailOTP(user.Email, otp)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to send OTP to email"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"message": "password reset OTP sent", "token": token})
-}
-
-
-// ResetPassword function
-func ResetPassword(c *gin.Context) {
-    var body struct {
-        Email       string `json:"email"`
-        OTP         string `json:"otp"`
-        NewPassword string `json:"new_password"`
-    }
-
-    if c.Bind(&body) != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-        return
-    }
-
-    var user models.User
-    result := db.DB.Where("email = ?", body.Email).First(&user)
-    if result.Error != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-        return
-    }
-
-    // Compare the provided OTP with the hashed OTP stored in the database
-    match, err := utils.ComparePasswords(user.OTP, body.OTP)
-    if err != nil || !match {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid OTP"})
-        return
-    }
-
-    // Hash the new password
-    hash, err := utils.PwdSaltAndHash(body.NewPassword)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "could not hash password"})
-        return
-    }
-
-    // Update the user's password and clear the OTP
-    user.Password = hash
-    user.OTP = "" // Clear the OTP after successful reset
-    db.DB.Save(&user)
-
-    // Generate a new JWT token
-    claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-        Issuer:    user.Email,
-        ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // Token valid for 1 hour
-    })
-
-    token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
-        return
-    }
-
-    c.JSON(http.StatusOK, gin.H{"message": "password reset successful", "token": token})
+	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to email","hashedOTP":hashedOTP,"otp":otp})
 }
