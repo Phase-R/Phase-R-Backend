@@ -102,35 +102,43 @@ func ForgotPassword(c *gin.Context) {
 		Email string `json:"email"`
 	}
 
-	if c.Bind(&body) != nil {
+	// Bind the request body to the struct
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	var user models.User 
+	var user models.User
+
+	// Find the user by email
 	result := db.DB.Where("email = ?", body.Email).First(&user)
 	if result.Error != nil {
 		c.JSON(405, gin.H{"error": "Email not found, please sign up"})
 		return
 	}
 
+	// Generate OTP and hashed OTP
 	otp, hashedOTP, err := utils.GenerateOTP()
-	if err!=nil {
-		c.JSON(401, gin.H{"error":"error in hashing otp"})
-	}
-
-	user.otp= hashedOTP
-	res := db.DB.Model(&models.User{}).Where("email = ?", body.Email).Update("otp", hashedOTP)
-	if res.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+	if err != nil {
+		c.JSON(401, gin.H{"error": "Error generating OTP"})
 		return
 	}
 
+	// Update the user's OTP field
+	user.OTP = hashedOTP
+
+	if err := db.DB.Save(&user).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to update OTP in the database"})
+		return
+	}
+
+	// Send the OTP email
 	err = sendEmailOTP(user.Email, otp)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to send OTP to email"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to email","hashedOTP":hashedOTP,"otp":otp})
+	// Return success response
+	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to email", "hashedOTP": hashedOTP, "otp": otp})
 }
