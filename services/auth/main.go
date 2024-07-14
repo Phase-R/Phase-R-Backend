@@ -23,5 +23,6 @@ func main() {
 	r.POST("/user/login", controllers.Login)
 	r.GET("/verify", controllers.VerifyEmail)
 	r.POST("user/forgot-password", controllers.ForgotPassword)
+	r.POST("user/reset-password", controllers.ResetPassword)
 	r.Run()
 }
