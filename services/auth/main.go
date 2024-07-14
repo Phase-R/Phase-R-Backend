@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/Phase-R/Phase-R-Backend/auth/controllers"
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/controllers"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -22,6 +22,7 @@ func main() {
 	r.POST("/user/new", controllers.CreateUser)
 	r.POST("/user/login", controllers.Login)
 	r.GET("/verify", controllers.VerifyEmail)
+	r.POST("user/forgot-password", controllers.ForgotPassword)
+	r.POST("user/reset-password", controllers.ResetPassword)
 	r.Run()
-
 }

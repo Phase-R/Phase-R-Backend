@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/alexedwards/argon2id"
 	"github.com/gin-gonic/gin"
@@ -84,7 +84,6 @@ func CreateUser(ctx *gin.Context) {
 	if newUserRequest.Age == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Age is required"})
 		return
-
 	}
 	err := db.DB.Where("email = ? OR username = ?", newUserRequest.Email, newUserRequest.Username).First(&newUser).Error
 	if err == nil {
