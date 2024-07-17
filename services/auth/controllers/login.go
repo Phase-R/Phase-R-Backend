@@ -56,8 +56,14 @@ func Login(c *gin.Context) {
 	var user models.User
 	result := db.DB.Where("email = ?", body.Email).First(&user)
 	if result.Error != nil{
-		c.JSON(405, gin.H{
+		c.JSON(404, gin.H{
 			"error": "invalid email or password (email)",
+		})
+		return
+	}
+	if !user.Verified {
+		c.JSON(405, gin.H{
+			"error": "email not verified",
 		})
 		return
 	}
