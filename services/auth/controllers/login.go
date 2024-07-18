@@ -84,7 +84,7 @@ func Login(c *gin.Context) {
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		c.JSON(401, gin.H{
-			"error": "token ge		neration error",
+			"error": "token generation error",
 		})
 		return
 	}
@@ -201,7 +201,7 @@ func ResetPassword(c *gin.Context) {
 
 	// Set the new JWT token as a cookie
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
+	c.SetCookie("Auth", token, 3600*24*30, "", "", false, false)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
