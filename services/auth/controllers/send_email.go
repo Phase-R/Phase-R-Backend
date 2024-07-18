@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Phase-R/Phase-R-Backend/auth/db"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -106,5 +106,38 @@ func VerifyEmail(ctx *gin.Context) {
 
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("verified", GenerateTokenstring, 3600*24*30,"","", false, true)
-	ctx.JSON(http.StatusOK, gin.H{"message": "Email successfully verified"})
+	ctx.Redirect(http.StatusFound, "http://localhost:3000/email-verified")
+}
+
+func sendEmailOTP(emailTo string, otp int) error {
+	password := os.Getenv("MAIL_PASS")
+	from := os.Getenv("EMAIL_FROM")
+
+	header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
+	if err != nil {
+		fmt.Println("Error reading header file: ", err)
+		return err
+	}
+
+	footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
+	if err != nil {
+		fmt.Println("Error reading footer file: ", err)
+		return err
+	}
+
+	body := string(header) + fmt.Sprintf("<p>daddy likes you, heres his phone number <3:</p><h1>%d</h1>", otp) + string(footer)
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", from)
+	m.SetHeader("To", emailTo)
+	m.SetHeader("Subject", "Forget password OTP")
+	m.SetBody("text/html", body)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, from, password)
+	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
