@@ -144,9 +144,9 @@ func ForgotPassword(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to send OTP to email"})
 		return
 	}
-	// Return success response
-	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to email, redirecting to reset password"})
-
+	c.JSON(200, gin.H{
+		"message": "login successful",
+	})
 }
 
 func ResetPassword(c *gin.Context) {
