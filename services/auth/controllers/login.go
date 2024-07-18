@@ -67,12 +67,6 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	// if user.Password != body.Password {
-	// 	c.JSON(405, gin.H{
-	// 		"error": "invalid email or password (password)",
-	// 	})
-	// 	return
-	// }
 
 	match, err := argon2id.ComparePasswordAndHash(body.Password, user.Password)
 	if err != nil || !match {
