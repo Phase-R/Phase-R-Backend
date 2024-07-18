@@ -106,7 +106,7 @@ func VerifyEmail(ctx *gin.Context) {
 
 	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie("verified", GenerateTokenstring, 3600*24*30,"","", false, true)
-	ctx.JSON(http.StatusOK, gin.H{"message": "Email successfully verified"})
+	ctx.Redirect(http.StatusFound, "http://localhost:3000/email-verified")
 }
 
 func sendEmailOTP(emailTo string, otp int) error {
