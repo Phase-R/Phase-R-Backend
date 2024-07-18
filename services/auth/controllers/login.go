@@ -90,13 +90,13 @@ func Login(c *gin.Context) {
 	token, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		c.JSON(401, gin.H{
-			"error": "token generation error",
+			"error": "token ge		neration error",
 		})
 		return
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
+	c.SetCookie("Auth", token, 3600*24*30,"","", false, false)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",
@@ -182,6 +182,10 @@ func ResetPassword(c *gin.Context) {
 
 	// Hash the new password
 	hashedPassword, err := argon2id.CreateHash(body.Password, argon2id.DefaultParams)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to hash password"})
+		return
+	}
 
 	// Update the user's password
 	user.Password = hashedPassword

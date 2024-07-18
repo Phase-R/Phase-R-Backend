@@ -38,14 +38,12 @@ func generateVerificationToken(userID string) (string, error) {
 }
 
 func CreateUser(ctx *gin.Context) {
-	const uniqueViolation = "23505"
-
 	type newUserInput struct {
 		Username string `json:"username"`
 		Fname    string `json:"fname"`
 		Lname    string `json:"lname"`
 		Email    string `json:"email"`
-		Password string `json:"password"`
+		Password string `json:"password"`	
 		Age      int    `json:"age"`
 	}
 
