@@ -138,8 +138,9 @@ func ForgotPassword(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to send OTP to email"})
 		return
 	}
+
 	c.JSON(200, gin.H{
-		"message": "login successful",
+		"message": "OTP sent",
 	})
 }
 
@@ -168,8 +169,16 @@ func ResetPassword(c *gin.Context) {
 	// Verify the OTP
 	match, err := argon2id.ComparePasswordAndHash(body.OTP, user.OTP)
 	if err != nil || !match {
-		c.JSON(404, gin.H{
-			"error": "invalid email or password compare",
+		c.JSON(405, gin.H{
+			"error": "invalid otp",
+		})
+		return
+	}
+
+	match, err = argon2id.ComparePasswordAndHash(body.Password,user.Password)
+	if match {
+		c.JSON(401, gin.H{
+			"error": "cannot reset same password",
 		})
 		return
 	}
