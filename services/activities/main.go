@@ -21,5 +21,9 @@ func main() {
 	r.GET("/get_activity/:id", controllers.GetActivity)
 	r.PUT("/update_activity/:id", controllers.UpdateActivity)
 	r.DELETE("/delete_activity/:id", controllers.DeleteActivity)
+	// User progress endpoints
+    r.GET("/user/:userId/progress", controllers.GetUserProgress)
+    r.PUT("/user/activity/:userActivityId/completion", controllers.UpdateUserActivityCompletion)
+    r.PUT("/drill/:drillId/completion", controllers.UpdateDrillCompletion)
 	r.Run()
 }
