@@ -67,12 +67,6 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	// if user.Password != body.Password {
-	// 	c.JSON(405, gin.H{
-	// 		"error": "invalid email or password (password)",
-	// 	})
-	// 	return
-	// }
 
 	match, err := argon2id.ComparePasswordAndHash(body.Password, user.Password)
 	if err != nil || !match {
@@ -96,7 +90,7 @@ func Login(c *gin.Context) {
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30,"","", false, true)
+	c.SetCookie("Auth", token, 3600*24*30,"","", false, false)
 
 	c.JSON(200, gin.H{
 		"message": "login successful",
@@ -182,6 +176,10 @@ func ResetPassword(c *gin.Context) {
 
 	// Hash the new password
 	hashedPassword, err := argon2id.CreateHash(body.Password, argon2id.DefaultParams)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to hash password"})
+		return
+	}
 
 	// Update the user's password
 	user.Password = hashedPassword
@@ -203,7 +201,7 @@ func ResetPassword(c *gin.Context) {
 
 	// Set the new JWT token as a cookie
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", token, 3600*24*30, "", "", false, true)
+	c.SetCookie("Auth", token, 3600*24*30, "", "", false, false)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
