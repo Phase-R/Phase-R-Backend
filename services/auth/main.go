@@ -12,17 +12,23 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	if err != nil {
+	if err != nil {								
 		log.Fatal("Error loading .env file")
 	}
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	// r.Use(cors.Default())
+	config := cors.DefaultConfig()
+    config.AllowOrigins = []string{"http://localhost:3000"} // Adjust this to your frontend URL
+    config.AllowHeaders = []string{"Content-Type"}
+	config.AllowCredentials = true
+    r.Use(cors.New(config))
+
 	db.Init()
 	r.POST("/user/new", controllers.CreateUser)
 	r.POST("/user/login", controllers.Login)
 	r.GET("/verify", controllers.VerifyEmail)
-	r.POST("user/forgot-password", controllers.ForgotPassword)
+	r.POST("user/forgot-password", controllers.ForgotPassword)			
 	r.POST("user/reset-password", controllers.ResetPassword)
 	r.Run()
 }
