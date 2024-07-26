@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"os"
 	"time"
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
@@ -175,6 +176,7 @@ func ResetPassword(c *gin.Context) {
 	// Verify the OTP
 	match, err := argon2id.ComparePasswordAndHash(body.OTP, user.OTP)
 	if err != nil || !match {
+		log.Println(err)
 		c.JSON(405, gin.H{
 			"error": "invalid otp",
 		})
