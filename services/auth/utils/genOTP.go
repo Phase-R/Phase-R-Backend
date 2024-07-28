@@ -9,7 +9,8 @@ import (
 
 func GenerateOTP() (int,string, error) {
     
-    otp := rand.Intn(1000000)
+    
+    otp := rand.Intn(900000)+100000
 
     otpString := strconv.Itoa(otp)
 
