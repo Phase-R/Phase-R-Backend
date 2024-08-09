@@ -4,6 +4,7 @@ go 1.22.5
 
 require (
 	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240718100204-48a87a60c9ad
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
 	gorm.io/gorm v1.25.11
