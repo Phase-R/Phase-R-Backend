@@ -2,10 +2,13 @@ module github.com/Phase-R/Phase-R-Backend/services/mental_health
 
 go 1.22.5
 
+replace github.com/Phase-R/Phase-R-Backend/db => ../../db
+
 require (
-	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240718100204-48a87a60c9ad
+	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240728144528-6530e62d16d6
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	gorm.io/gorm v1.25.11
 )
@@ -31,11 +34,11 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
-	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.8.0 // indirect
