@@ -7,7 +7,7 @@ import (
 
 type QuestionSet struct {
 	gorm.Model
-	QuestionSetID		string 			`json:"id" gorm:"primaryKey"`
+	ID					string			`json:"id" gorm:"primaryKey"`
 	Questions			pq.StringArray	`json:"questions" gorm:"type:text"`
 }
 

@@ -25,5 +25,6 @@ func main() {
 
 	db.Init()
 	r.GET("/fetch_questions", controllers.FetchQuestionSet)
+	r.POST("/evaluate_answers", controllers.ScoreEvaluation)
 	r.Run()
 }
