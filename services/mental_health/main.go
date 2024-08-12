@@ -24,6 +24,7 @@ func main() {
     r.Use(cors.New(config))
 
 	db.Init()
+	r.POST("/add_questions", controllers.AddQuestionSet)
 	r.GET("/fetch_questions", controllers.FetchQuestionSet)
 	r.POST("/evaluate_answers", controllers.ScoreEvaluation)
 	r.Run()

@@ -7,13 +7,12 @@ import (
 
 type QuestionSet struct {
 	gorm.Model
-	ID					string			`json:"id" gorm:"primaryKey"`
-	Questions			pq.StringArray	`json:"questions" gorm:"type:text"`
+	ID					int32			`json:"id" gorm:"primaryKey;autoIncrement:true;unique"`
+	Questions			pq.StringArray	`json:"questions" gorm:"type:text[]"`
 }
 
 type MarkedQuestionSet struct {
 	gorm.Model
-	ID					string		`json:"id" gorm:"primaryKey"`
-	UserID				string		`json:"uid" gorm:"foreignKey:"`
-	Marked				[]bool		`json:"marked" gorm:"type:boolean[]"`
+	UserID				string		`json:"uid" gorm:"uniqueIndex"`
+	Marked				pq.Int32Array		`json:"marked" gorm:"type:int[]"`
 }
