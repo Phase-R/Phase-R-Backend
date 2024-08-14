@@ -5,7 +5,7 @@ import (
     "github.com/Phase-R/Phase-R-Backend/activities/db"
     "github.com/Phase-R/Phase-R-Backend/db/models"
     "github.com/gin-gonic/gin"
-    "github.com/nrednav/cuid2"
+    // "github.com/nrednav/cuid2"
     "gorm.io/gorm"
 )
 
