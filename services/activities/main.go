@@ -13,6 +13,7 @@ func main() {
 	r.Use(cors.Default())
 	db.Init()
 	//drill endpoints
+	r.POST("/create_drill",controllers.CreateDrill)
 	r.GET("/get_drill/:id", controllers.GetDrill)
 	r.GET("/get_drills_by_type/:type", controllers.GetDrillsByType)
 	r.PUT("/update_drill/:id", controllers.UpdateDrill)
