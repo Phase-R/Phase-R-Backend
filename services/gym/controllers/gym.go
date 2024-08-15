@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
-	"github.com/Phase-R/Phase-R-Backend/services/gym/db" 
+	"github.com/Phase-R/Phase-R-Backend/gym/db" 
 )
 
 func GetAllGymData(ctx *gin.Context) {
