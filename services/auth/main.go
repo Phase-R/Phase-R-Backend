@@ -30,5 +30,5 @@ func main() {
 	r.GET("/verify", controllers.VerifyEmail)
 	r.POST("user/forgot-password", controllers.ForgotPassword)			
 	r.POST("user/reset-password", controllers.ResetPassword)
-	r.Run()
+	r.Run(":8081")
 }
