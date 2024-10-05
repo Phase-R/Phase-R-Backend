@@ -44,6 +44,18 @@ func GetActType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, actType)
 }
 
+// func GetActTypeByActId(ctx *gin.Context) {
+// 	id := ctx.Param("id")
+// 	var actType models.ActivityType
+// 	res := db.DB.Where("activity_id = ?", id).First(&actType)
+// 	if res.Error != nil {
+// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+// 		return
+// 	}
+
+// 	ctx.JSON(http.StatusOK, actType)
+// }
+
 func DeleteActType(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var actType models.ActivityType
