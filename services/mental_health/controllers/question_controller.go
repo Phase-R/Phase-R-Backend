@@ -185,7 +185,7 @@ func ScoreEvaluation(ctx *gin.Context) {
 		score += val
 	}
 
-	k10 := float64(score) / float64(15)
+	k10 := float64(score) / float64(len(answerSet.Answers))
 
 	// Fetch existing marked question set for the user
 	var markedSet models.MarkedQuestionSet
