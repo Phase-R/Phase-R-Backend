@@ -56,14 +56,32 @@ func PostThoughts(ctx *gin.Context) {
         return
     }
 
-    var thoughts models.Thoughts
-    thoughts.DateOfThought = time.Now()
-    thoughts.UserID = userID
-    thoughts.Thought = body.Thought  
-    if err := db.DB.Create(&thoughts).Error; err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+    // Get the current date (without time)
+    currentDate := time.Now().Truncate(24 * time.Hour)
 
-    ctx.JSON(http.StatusCreated, gin.H{"message": "Thought added successfully"})
+    var existingThought models.Thoughts
+    result := db.DB.Where("user_id = ? AND date_of_thought >= ? AND date_of_thought < ?", 
+        userID, currentDate, currentDate.Add(24*time.Hour)).First(&existingThought)
+
+    if result.Error == nil {
+        // Thought for today exists, update it
+        existingThought.Thought = body.Thought
+        if err := db.DB.Save(&existingThought).Error; err != nil {
+            ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        ctx.JSON(http.StatusOK, gin.H{"message": "Thought updated successfully"})
+    } else {
+        // Create a new thought
+        newThought := models.Thoughts{
+            DateOfThought: currentDate,
+            UserID:        userID,
+            Thought:       body.Thought,
+        }
+        if err := db.DB.Create(&newThought).Error; err != nil {
+            ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        ctx.JSON(http.StatusCreated, gin.H{"message": "New thought added successfully"})
+    }
 }
