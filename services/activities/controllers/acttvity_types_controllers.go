@@ -34,7 +34,7 @@ func CreateActType(ctx *gin.Context) {
 
 func GetActType(ctx *gin.Context) {
 	id := ctx.Param("id")
-	var actType models.Activities
+	var actType models.ActivityType
 	res := db.DB.Where("id = ?", id).First(&actType)
 	if res.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
@@ -44,9 +44,21 @@ func GetActType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, actType)
 }
 
+// func GetActTypeByActId(ctx *gin.Context) {
+// 	id := ctx.Param("id")
+// 	var actType models.ActivityType
+// 	res := db.DB.Where("activity_id = ?", id).First(&actType)
+// 	if res.Error != nil {
+// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+// 		return
+// 	}
+
+// 	ctx.JSON(http.StatusOK, actType)
+// }
+
 func DeleteActType(ctx *gin.Context) {
 	id := ctx.Param("id")
-	var actType models.Activities
+	var actType models.ActivityType
 	res := db.DB.Where("id = ?", id).First(&actType)
 
 	if res.Error != nil {
@@ -68,7 +80,7 @@ func DeleteActType(ctx *gin.Context) {
 
 func UpdateActType(ctx *gin.Context) {
 	id := ctx.Param("id")
-	var actType models.Activities
+	var actType models.ActivityType
 	var chg models.Activities
 
 	err := ctx.ShouldBindJSON(&chg)
