@@ -56,7 +56,7 @@ func VerifyEmail(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JWT token"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 

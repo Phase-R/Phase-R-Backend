@@ -1,6 +1,7 @@
 package models
 
 import (
+	"time"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -13,6 +14,13 @@ type QuestionSet struct {
 
 type MarkedQuestionSet struct {
 	gorm.Model
-	UserID				string		`json:"uid" gorm:"uniqueIndex"`
+	UserID				string				`json:"uid" gorm:"uniqueIndex"`
 	Marked				pq.Int32Array		`json:"marked" gorm:"type:int[]"`
+}
+
+type Thoughts struct {
+	gorm.Model
+	UserID				string			    `json:"uid"`
+	DateOfThought		time.Time		   `json:"date" gorm:"type:timestamp"`
+	Thought			    string             `json:"thought" gorm:"type:text"`
 }
