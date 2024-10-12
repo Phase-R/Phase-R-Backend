@@ -24,6 +24,6 @@ func main() {
     r.Use(cors.New(config))
 
 	db.Init()
-	r.POST("/generate_diet", controllers.dietGenProxy)
+	r.POST("/generate_diet", controllers.DietGenProxy)
 	r.Run()
 }
