@@ -17,7 +17,7 @@ func main() {
 	}
 
 	r := gin.Default()
-	// r.Use(cors.Default())
+	
 	config := cors.DefaultConfig()
     config.AllowOrigins = []string{"http://localhost:3000"}
     config.AllowHeaders = []string{"Content-Type"}
@@ -28,7 +28,7 @@ func main() {
 	r.POST("/user/new", controllers.CreateUser)
 	r.POST("/user/login", controllers.Login)
 	r.GET("/verify", controllers.VerifyEmail)
-	r.POST("user/forgot-password", controllers.ForgotPassword)			
-	r.POST("user/reset-password", controllers.ResetPassword)
+	r.POST("/user/forgot-password", controllers.ForgotPassword)			
+	r.POST("/user/reset-password", controllers.ResetPassword)
 	r.Run()
 }
