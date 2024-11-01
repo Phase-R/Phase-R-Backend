@@ -129,7 +129,7 @@ func CreateUser(ctx *gin.Context) {
 	// send email
 	err = SendVerificationEmail(newUser.Email, token)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send verification email"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 

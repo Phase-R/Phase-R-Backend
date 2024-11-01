@@ -1,3 +1,5 @@
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021 h1:VAXeeDwIgctq0rhzw4GsI6ZtDQCtoZwPf1ci+drE5DA=
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021/go.mod h1:ZtPKy4oNcsc3fa12Iqn7fzlOD2buNFo/q619ruvvpyA=
 github.com/alexedwards/argon2id v1.0.0 h1:wJzDx66hqWX7siL/SRUmgz3F8YMrd/nfX/xHHcQQP0w=
 github.com/alexedwards/argon2id v1.0.0/go.mod h1:tYKkqIjzXvZdzPvADMWOEZ+l6+BD6CtBXMj5fnJppiw=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=
