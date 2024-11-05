@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/Phase-R/Phase-R-Backend/services/auth/controllers"
-	"github.com/Phase-R/Phase-R-Backend/services/auth/connect"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

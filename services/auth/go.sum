@@ -1,5 +1,5 @@
-github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021 h1:VAXeeDwIgctq0rhzw4GsI6ZtDQCtoZwPf1ci+drE5DA=
-github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021/go.mod h1:ZtPKy4oNcsc3fa12Iqn7fzlOD2buNFo/q619ruvvpyA=
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20241012121534-a1476a0816cc h1:m4Hd7YmmyupONclbNPxTLJNyonYt4GjCVDps0iV2x6E=
+github.com/Phase-R/Phase-R-Backend/db v0.0.0-20241012121534-a1476a0816cc/go.mod h1:7MaHt8tpz0cRkYLmAqTGbm0Bx4ZblqGJx6FuueRtIk0=
 github.com/alexedwards/argon2id v1.0.0 h1:wJzDx66hqWX7siL/SRUmgz3F8YMrd/nfX/xHHcQQP0w=
 github.com/alexedwards/argon2id v1.0.0/go.mod h1:tYKkqIjzXvZdzPvADMWOEZ+l6+BD6CtBXMj5fnJppiw=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=
@@ -166,7 +166,7 @@ gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gorm.io/driver/postgres v1.5.9 h1:DkegyItji119OlcaLjqN11kHoUgZ/j13E0jkJZgD6A8=
 gorm.io/driver/postgres v1.5.9/go.mod h1:DX3GReXH+3FPWGrrgffdvCk3DQ1dwDPdmbenSkweRGI=
-gorm.io/gorm v1.25.10 h1:dQpO+33KalOA+aFYGlK+EfxcI5MbO7EP2yYygwh9h+s=
-gorm.io/gorm v1.25.10/go.mod h1:hbnx/Oo0ChWMn1BIhpy1oYozzpM15i4YPuHDmfYtwg8=
+gorm.io/gorm v1.25.12 h1:I0u8i2hWQItBq1WfE0o2+WuL9+8L21K9e2HHSTE/0f8=
+gorm.io/gorm v1.25.12/go.mod h1:xh7N7RHfYlNc5EmcI/El95gXusucDrQnHXe0+CgWcLQ=
 nullprogram.com/x/optparse v1.0.0/go.mod h1:KdyPE+Igbe0jQUrVfMqDMeJQIJZEuyV7pjYmp6pbG50=
 rsc.io/pdf v0.1.1/go.mod h1:n8OzWcQ6Sp37PL01nO98y4iUCRdTGarVfzxY20ICaU4=

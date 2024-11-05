@@ -1,8 +1,8 @@
 module github.com/Phase-R/Phase-R-Backend/services/auth
 
-go 1.22.3
+go 1.23
 
-toolchain go1.22.5
+toolchain go1.23.0
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
@@ -13,13 +13,13 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/nrednav/cuid2 v1.0.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	gorm.io/gorm v1.25.10
+	gorm.io/gorm v1.25.12
 )
 
 require github.com/lib/pq v1.10.9 // indirect
 
 require (
-	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20240710160436-6433b6c7b021
+	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20241012121534-a1476a0816cc
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
@@ -57,5 +57,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.9 // indirect
 )
-
-replace github.com/Phase-R/Phase-R-Backend/db => ../../db

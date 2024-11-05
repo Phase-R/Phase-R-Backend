@@ -1,15 +1,16 @@
-FROM golang:1.22.3
+# Dockerfile
+FROM golang:1.23
 
 WORKDIR /app
 
-COPY go.mod .
-COPY go.sum .
-
-COPY ../../db ./db
-
-COPY main.go .
-
+COPY go.* ./
 RUN go mod download
-RUN go build -o bin .
+COPY main.go ./
 
-ENTRYPOINT ["/app/bin"]
+COPY . .
+
+RUN go build -o main main.go
+
+EXPOSE 8080
+
+CMD ["./main"]
