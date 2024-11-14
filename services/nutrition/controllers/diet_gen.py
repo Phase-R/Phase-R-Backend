@@ -19,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure thread pool for parallel processing
 THREAD_POOL_SIZE = 4
 thread_pool = ThreadPoolExecutor(max_workers=THREAD_POOL_SIZE)
 
@@ -51,33 +50,26 @@ async def generate_diet_parallel(message: str, batch_size: int = 3) -> str:
     """Generate diet suggestions in parallel using multiple Ollama instances"""
     messages = [{"role": "user", "content": message}]
 
-    # Create multiple concurrent requests to Ollama
     async def make_single_request():
         response = ollama.chat(model="llama3", messages=messages)
         return response["message"]["content"]
 
-    # Create multiple tasks
     tasks = [make_single_request() for _ in range(batch_size)]
 
-    # Wait for all tasks to complete
     responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-    # Filter out any failed responses and combine results
     valid_responses = [r for r in responses if isinstance(r, str)]
     if not valid_responses:
         return "Failed to generate diet suggestions"
 
-    # Return the best or most complete response
     return max(valid_responses, key=len)
 
 
 async def chat_stream(message: str):
     """Stream the diet generation results"""
     try:
-        # Generate diet suggestions in parallel
         result = await generate_diet_parallel(message)
 
-        # Stream the result in chunks
         chunk_size = 100
         for i in range(0, len(result), chunk_size):
             chunk = result[i : i + chunk_size]
@@ -102,25 +94,20 @@ class ResponseCache:
             self.cache[key] = value
 
 
-# Initialize cache
 response_cache = ResponseCache()
 
 
 @app.post("/generate_diet")
 async def get_chat_stream(request: Request):
     try:
-        # Read the prompt template
         prompt_template = ""
         with open("../configs/prompt.txt", "r") as file:
             prompt_template = file.read()
 
-        # Get parameters from request
         params = await request.json()
 
-        # Create cache key based on parameters
         cache_key = json.dumps(params, sort_keys=True)
 
-        # Check cache first
         cached_response = await response_cache.get(cache_key)
         if cached_response:
 
@@ -129,7 +116,6 @@ async def get_chat_stream(request: Request):
 
             return StreamingResponse(stream_cached(), media_type="text/event-stream")
 
-        # Format message with parameters
         message = prompt_template.format(
             plan=params.get("plan"),
             activity=params.get("activity"),
@@ -157,5 +143,5 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        workers=4,  # Multiple worker processes for handling concurrent requests
+        workers=4,
     )
