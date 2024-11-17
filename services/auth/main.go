@@ -31,5 +31,7 @@ func main() {
 
 	r.POST("/user/forgot-password", controllers.ForgotPassword)			
 	r.POST("/user/reset-password", controllers.ResetPassword)
+	r.GET("/user/google/signin",controllers.BeginGoogleAuth)
+	r.GET("user/google/callback", controllers.OAuthCallback)
 	r.Run()
 }

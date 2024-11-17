@@ -16,7 +16,13 @@ require (
 	gorm.io/gorm v1.25.12
 )
 
-require github.com/lib/pq v1.10.9 // indirect
+require (
+	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/lib/pq v1.10.9 // indirect
+	github.com/markbates/goth v1.80.0 // indirect
+	golang.org/x/oauth2 v0.17.0 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
+)
 
 require (
 	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20241012121534-a1476a0816cc
