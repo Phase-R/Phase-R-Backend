@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/alexedwards/argon2id"
@@ -129,7 +128,7 @@ func CreateUser(ctx *gin.Context) {
 	// send email
 	err = SendVerificationEmail(newUser.Email, token)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send verification email"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
