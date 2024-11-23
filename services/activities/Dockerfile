@@ -7,7 +7,7 @@ FROM golang:1.23 AS builder
 # Set the working directory inside the builder container
 WORKDIR /app
 
-# Copy dependency files first to leverage Docker cache
+# Copy dependency files first
 COPY go.mod go.sum ./
 
 # Download dependencies
@@ -16,15 +16,15 @@ RUN go mod download
 # Copy the rest of the application source code
 COPY . .
 
-# Build the Go application for Linux
-RUN GOOS=linux GOARCH=amd64 go build -o main main.go
+# Build the Go application as a static binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main main.go
 
 
 ###############################################################################
 # Stage 2: Minimal runtime container                                          #
 ###############################################################################
-# Use a minimal runtime image
-FROM debian:bullseye-slim
+# Use a completely minimal runtime image
+FROM scratch
 
 # Set the working directory in the runtime container
 WORKDIR /root/
