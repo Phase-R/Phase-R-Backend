@@ -6,19 +6,19 @@ services:
     ports:
       - "8081:8080"
 
-  # auth:
-  #   build: ./services/auth
-  #   env_file:
-  #     - ./services/auth/.env
-  #   ports:
-  #     - "8082:8080"
+  auth:
+    build: ./services/auth
+    env_file:
+      - ./services/auth/.env
+    ports:
+      - "8082:8080"
 
-  # gym:
-  #   build: ./services/gym
-  #   env_file:
-  #     - ./services/gym/.env
-  #   ports:
-  #     - "8083:8080"
+  gym:
+    build: ./services/gym
+    env_file:
+      - ./services/gym/.env
+    ports:
+      - "8083:8080"
 
   # mental_health:
   #   build: ./services/mental_health
