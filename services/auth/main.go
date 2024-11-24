@@ -18,11 +18,13 @@ func main() {
 
 	r := gin.Default()
 	
-	config := cors.DefaultConfig()
-    config.AllowOrigins = []string{"https://phase-r.fit"}
-    config.AllowHeaders = []string{"Content-Type"}
-	config.AllowCredentials = true
-    r.Use(cors.New(config))
+	// config := cors.DefaultConfig()
+    // config.AllowOrigins = []string{"https://phase-r.fit"}
+    // config.AllowHeaders = []string{"Content-Type"}
+	// config.AllowCredentials = true
+    // r.Use(cors.New(config))
+
+	r.Use(cors.Default())
 
 	db.Init()
 	r.POST("/user/new", controllers.CreateUser)
