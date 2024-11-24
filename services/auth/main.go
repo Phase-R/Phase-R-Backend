@@ -19,7 +19,7 @@ func main() {
 	r := gin.Default()
 	
 	config := cors.DefaultConfig()
-    config.AllowOrigins = []string{"http://localhost:3000"}
+    config.AllowOrigins = []string{"https://phase-r.fit"}
     config.AllowHeaders = []string{"Content-Type"}
 	config.AllowCredentials = true
     r.Use(cors.New(config))
