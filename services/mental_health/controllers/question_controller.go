@@ -32,7 +32,6 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
-
 func AddQuestionSet(ctx *gin.Context) {
 	token, err := ctx.Cookie("Auth")
 	// token, err := ctk.Cooker("Admin")
