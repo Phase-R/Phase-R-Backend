@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-
 	"github.com/Phase-R/Phase-R-Backend/services/auth/controllers"
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/gin-contrib/cors"
@@ -31,11 +29,7 @@ func main() {
 	config.AllowCredentials = true
 	r.Use(cors.New(config))
 
-	// Initialize database connection
-	err = db.Init() // Handle database initialization error
-	if err != nil {
-		log.Fatalf("Database initialization failed: %v", err)
-	}
+	db.Init() 
 
 	// Initialize Google OAuth
 	controllers.InitializeOAuthGoogle()

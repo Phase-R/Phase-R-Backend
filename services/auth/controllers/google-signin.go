@@ -4,13 +4,14 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/gob"
 	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
-	"github.com/gin-contrib/sessions"
+	"github.com/gorilla/sessions"
 	"github.com/nrednav/cuid2"
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
@@ -20,6 +21,11 @@ import (
 	"gorm.io/gorm"
 	"github.com/golang-jwt/jwt/v4"
 )
+
+// Register models.User type with gob to allow serialization
+func init() {
+	gob.Register(models.User{})
+}
 
 var (
 	oauthConfGl = &oauth2.Config{
@@ -32,10 +38,21 @@ var (
 	oauthStateStringGl = ""
 )
 
+var store = sessions.NewCookieStore([]byte("secret"))
+
 // InitializeSessionMiddleware initializes the session middleware.
 func InitializeSessionMiddleware(r *gin.Engine) {
-	// Store sessions in cookies
-	r.Use(sessions.Sessions("mysession", sessions.NewCookieStore([]byte("secret"))))
+	// Using the gorilla cookie store
+	r.Use(func(c *gin.Context) {
+		session, err := store.Get(c.Request, "mysession")
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to get session: %v", err)
+			c.Abort()
+			return
+		}
+		c.Set("session", session)
+		c.Next()
+	})
 }
 
 // InitializeOAuthGoogle sets up OAuth configuration using environment variables.
@@ -73,98 +90,110 @@ func HandleGoogleLogin(c *gin.Context) {
 
 // CallBackFromGoogle handles the OAuth 2.0 callback from Google.
 func CallBackFromGoogle(c *gin.Context) {
-	state := c.Query("state")
-	if state != oauthStateStringGl {
-		c.String(http.StatusBadRequest, "Invalid state parameter")
-		return
-	}
+    state := c.Query("state")
+    if state != oauthStateStringGl {
+        c.String(http.StatusBadRequest, "Invalid state parameter")
+        return
+    }
 
-	code := c.Query("code")
-	if code == "" {
-		c.String(http.StatusBadRequest, "Authorization code not found")
-		return
-	}
+    code := c.Query("code")
+    if code == "" {
+        c.String(http.StatusBadRequest, "Authorization code not found")
+        return
+    }
 
-	token, err := oauthConfGl.Exchange(context.Background(), code)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to exchange token: %v", err)
-		return
-	}
+    token, err := oauthConfGl.Exchange(context.Background(), code)
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Failed to exchange token: %v", err)
+        return
+    }
 
-	client := oauthConfGl.Client(context.Background(), token)
-	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Failed to get user info: %v", err)
-		return
-	}
-	defer resp.Body.Close()
+    client := oauthConfGl.Client(context.Background(), token)
+    resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Failed to get user info: %v", err)
+        return
+    }
+    defer resp.Body.Close()
 
-	var userInfo map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		c.String(http.StatusInternalServerError, "Failed to parse user info: %v", err)
-		return
-	}
+    var userInfo map[string]interface{}
+    if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
+        c.String(http.StatusInternalServerError, "Failed to parse user info: %v", err)
+        return
+    }
 
-	email, _ := userInfo["email"].(string)
-	fname, _ := userInfo["given_name"].(string) // `first_name` should be `given_name`
-	lname, _ := userInfo["family_name"].(string) // `last_name` should be `family_name`
+    email, _ := userInfo["email"].(string)
+    fname, _ := userInfo["given_name"].(string)
+    lname, _ := userInfo["family_name"].(string)
 
-	if email == "" {
-		c.String(http.StatusBadRequest, "Email not found in user info")
-		return
-	}
+    if email == "" {
+        c.String(http.StatusBadRequest, "Email not found in user info")
+        return
+    }
 
-	id := cuid2.Generate()
-	if id == "" {
-		c.String(http.StatusInternalServerError, "Failed to generate user ID")
-		return
-	}
+    id := cuid2.Generate()
+    if id == "" {
+        c.String(http.StatusInternalServerError, "Failed to generate user ID")
+        return
+    }
 
-	// Check if the user exists in the database
-	var user models.User
-	result := db.DB.Where("email = ?", email).First(&user)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			// User does not exist, create a new user
-			user = models.User{
-				ID:       id,
-				Username: fname + lname,
-				Fname:    fname,
-				Lname:    lname,
-				Email:    email,
-				Password: "", 
-				Age:      0,  
-				Access:   "free",
-				Verified: true,
-			}
-			if err := db.DB.Create(&user).Error; err != nil {
-				c.String(http.StatusInternalServerError, "Failed to create user: %v", err)
-				return
-			}
-		} else {
-			c.String(http.StatusInternalServerError, "Database error: %v", result.Error)
-			return
-		}
-	}
+    // Check if the user exists in the database
+    var user models.User
+    result := db.DB.Where("email = ?", email).First(&user)
+    if result.Error != nil {
+        if result.Error == gorm.ErrRecordNotFound {
+            // User does not exist, create a new user
+            user = models.User{
+                ID:       id,
+                Username: fname + lname,
+                Fname:    fname,
+                Lname:    lname,
+                Email:    email,
+                Password: "",
+                Age:      0,
+                Access:   "free",
+                Verified: true,
+            }
+            if err := db.DB.Create(&user).Error; err != nil {
+                c.String(http.StatusInternalServerError, "Failed to create user: %v", err)
+                return
+            }
+        } else {
+            c.String(http.StatusInternalServerError, "Database error: %v", result.Error)
+            return
+        }
+    }
 
-	// Generate JWT token
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iss": user.Email,
-		"exp": time.Now().Add(24 * time.Hour).Unix(),
-	})
+    // Generate JWT token
+    claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "iss": user.Email,
+        "exp": time.Now().Add(24 * time.Hour).Unix(),
+    })
 
-	tokenString, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Token generation failed: %v", err)
-		return
-	}
+    tokenString, err := claims.SignedString([]byte(os.Getenv("SECRET_KEY")))
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Token generation failed: %v", err)
+        return
+    }
 
-	// Set the JWT token as a cookie (use HTTPS in production)
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Auth", tokenString, 3600*24*30, "", "", false, false)
+    // Set the JWT token as a cookie (use HTTPS in production)
+    c.SetSameSite(http.SameSiteLaxMode)
+    c.SetCookie("Auth", tokenString, 3600*24*30, "", "", false, false)
 
-	// Save user info in session
-	session := sessions.Default(c)
-	session.Set("user", user)
-	session.Save()
+    // Save user info in session
+    session, err := store.Get(c.Request, "mysession")
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Failed to get session: %v", err)
+        return
+    }
+    session.Values["user"] = user
+    if err := session.Save(c.Request, c.Writer); err != nil {
+        c.String(http.StatusInternalServerError, "Failed to save session: %v", err)
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "message":      "Login successful",
+        "isAuthenticated": true,  
+    })
 }
