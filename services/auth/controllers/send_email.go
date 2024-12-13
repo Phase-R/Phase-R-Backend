@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/gin-gonic/gin"
@@ -56,7 +55,7 @@ func VerifyEmail(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse JWT token"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 

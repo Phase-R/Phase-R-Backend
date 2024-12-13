@@ -32,6 +32,7 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 	return token, nil
 }
 
+
 func AddQuestionSet(ctx *gin.Context) {
 	token, err := ctx.Cookie("Auth")
 	// token, err := ctk.Cooker("Admin")
@@ -75,30 +76,30 @@ func AddQuestionSet(ctx *gin.Context) {
 }
 
 func FetchQuestionSet(ctx *gin.Context) {
-	// Retrieve token from cookies
+
 	token, err := ctx.Cookie("Auth")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User ID not found in cookies"})
+		ctx.JSON(400, gin.H{"message": token})
 		return
 	}
 
 	// Parse the JWT token
 	parsedToken, err := ParseToken(token)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		ctx.JSON(401, gin.H{"message": "Invalid token"})
 		return
 	}
 
 	// Extract the user ID from the token
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+		ctx.JSON(402, gin.H{"message": "Invalid token claims"})
 		return
 	}
 
 	userEmail, ok := claims["iss"].(string)
 	if !ok {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
+		ctx.JSON(403, gin.H{"message": "Invalid user ID in token"})
 		return
 	}
 
@@ -106,7 +107,7 @@ func FetchQuestionSet(ctx *gin.Context) {
 	var user models.User
 	res := db.DB.Where("email = ?", userEmail).First(&user)
 	if res.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		ctx.JSON(405, gin.H{"message": "User not found"})
 		return
 	}
 	userID := user.ID
@@ -128,7 +129,7 @@ func FetchQuestionSet(ctx *gin.Context) {
 
 	res = db.DB.Raw(query, userID, userID).Scan(&qSet)
 	if res.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": res.Error.Error()})
+		ctx.JSON(500, gin.H{"message": res.Error.Error()})
 		return
 	}
 
@@ -217,3 +218,4 @@ func ScoreEvaluation(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"k10": k10, "User ID": userID})
 }
+

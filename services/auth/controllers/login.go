@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"time"
+	
 	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
 	"github.com/Phase-R/Phase-R-Backend/services/auth/utils"
@@ -37,12 +38,11 @@ func Login(c *gin.Context) {
 		token, err := ParseToken(tokenString)
 		if err == nil && token.Valid {
 			c.JSON(201, gin.H{
-				"message": "already logged in",
+				"message": token,
 			})
 			return
 		}
 	}
-
 	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
