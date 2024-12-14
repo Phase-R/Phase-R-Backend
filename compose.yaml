@@ -20,12 +20,12 @@ services:
   #   ports:
   #     - "8083:8080"
 
-  # mental_health:
-  #   build: ./services/mental_health
-  #   env_file:
-  #     - ./services/mental_health/.env
-  #   ports:
-  #     - "8084:8080"
+  mental_health:
+    build: ./services/mental_health
+    env_file:
+      - ./services/mental_health/.env
+    ports:
+      - "8084:8080"
 
   # nutrition:
   #   build: ./services/nutrition
