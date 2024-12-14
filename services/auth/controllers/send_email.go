@@ -2,33 +2,65 @@ package controllers
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-	"time"
-	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/Phase-R/Phase-R-Backend/db/models"
+	"github.com/Phase-R/Phase-R-Backend/services/auth/db"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	gomail "gopkg.in/gomail.v2"
+	"net/http"
+	"os"
+	"time"
 )
 
 func SendVerificationEmail(emailTo string, token string) error {
 	password := os.Getenv("MAIL_PASS")
 	from := os.Getenv("EMAIL_FROM")
 
-	header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
-	if err != nil {
-		fmt.Println("Error reading header file: ", err)
-		return err
-	}
+	// header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
+	// if err != nil {
+	// 	fmt.Println("Error reading header file: ", err)
+	// 	return err
+	// }
 
-	footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
-	if err != nil {
-		fmt.Println("Error reading footer file: ", err)
-		return err
-	}
+	// footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
+	// if err != nil {
+	// 	fmt.Println("Error reading footer file: ", err)
+	// 	return err
+	// }
+	header := `<!DOCTYPE html>
+			<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+						background-color: #f6f6f6;
+						margin: 0;
+						padding: 0;
+					}
+					.header {
+						background-color: #4CAF50;
+						padding: 20px;
+						text-align: center;
+						color: white;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<h1>Welcome to Phaser</h1>
+				</div>`
+	// footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
+	// if err != nil {
+	// 	fmt.Println("Error reading footer file: ", err)
+	// 	return err
+	// }
+	footer := `<div class="footer" style="padding: 20px; text-align: center; background-color: #f6f6f6;">
+        <p>&copy; 2024 Phaser. All rights reserved.</p>
+			</div>
+		</body>
+		</html>`
 
-	body := string(header) + fmt.Sprintf("<a href='http://localhost:8080/verify?token=%s'>Verify Email</a>", token) + string(footer)
+	body := string(header) + fmt.Sprintf("<a href='http://api.phase-r.fit/auth/verify?token=%s'>Verify Email</a>", token) + string(footer)
 
 	m := gomail.NewMessage()
 	m.SetHeader("From", from)
@@ -92,10 +124,9 @@ func VerifyEmail(ctx *gin.Context) {
 		return
 	}
 
-
 	GenerateTokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": user.Email,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})
 	GenerateTokenstring, err := GenerateTokenClaims.SignedString([]byte(getJWTSecretKey()))
 	if err != nil {
@@ -104,26 +135,52 @@ func VerifyEmail(ctx *gin.Context) {
 	}
 
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("verified", GenerateTokenstring, 3600*24*30,"","", false, true)
+	ctx.SetCookie("verified", GenerateTokenstring, 3600*24*30, "", "", false, true)
 	// ctx.JSON(http.StatusOK, gin.H{"message": "Email successfully verified"})
-	ctx.Redirect(http.StatusFound, "http://localhost:3000/email-verified")
+	ctx.Redirect(http.StatusFound, "https://phase-r.fit/email-verified")
 }
 
 func sendEmailOTP(emailTo string, otp int) error {
 	password := os.Getenv("MAIL_PASS")
 	from := os.Getenv("EMAIL_FROM")
 
-	header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
-	if err != nil {
-		fmt.Println("Error reading header file: ", err)
-		return err
-	}
-
-	footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
-	if err != nil {
-		fmt.Println("Error reading footer file: ", err)
-		return err
-	}
+	// header, err := os.ReadFile("./controllers/email_templates/verify_email_header.html")
+	// if err != nil {
+	// 	fmt.Println("Error reading header file: ", err)
+	// 	return err
+	// }
+	header := `<!DOCTYPE html>
+			<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+						background-color: #f6f6f6;
+						margin: 0;
+						padding: 0;
+					}
+					.header {
+						background-color: #4CAF50;
+						padding: 20px;
+						text-align: center;
+						color: white;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="header">
+					<h1>Welcome to Phaser</h1>
+				</div>`
+	// footer, err := os.ReadFile("./controllers/email_templates/verify_email_footer.html")
+	// if err != nil {
+	// 	fmt.Println("Error reading footer file: ", err)
+	// 	return err
+	// }
+	footer := `<div class="footer" style="padding: 20px; text-align: center; background-color: #f6f6f6;">
+        <p>&copy; 2024 Phaser. All rights reserved.</p>
+			</div>
+		</body>
+		</html>`
 
 	body := string(header) + fmt.Sprintf("<p>daddy likes you, heres his phone number <3:</p><h1>%d</h1>", otp) + string(footer)
 
