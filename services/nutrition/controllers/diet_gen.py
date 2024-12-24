@@ -52,12 +52,12 @@ async def get_chat_stream(request: Request):
     # The prompt is called as a string in the program itself.
     # Only use the text file for testing purposes.
     prompt_template = (
-        """Generate a meal plan for {plan} with a daily activity level being {activity}.
-        Target calories: {target_cal} kcal. Macro Distribution: {target_protein} g protein, 
-        {target_carbs} g of carbs and {target_fat} g of fat. Give this in the form a table with days: 
+        f"""Generate a meal plan for {{plan}} with a daily activity level being {{activity}}.
+        Target calories: {{target_cal}} kcal. Macro Distribution: {{target_protein}} g protein, 
+        {{target_carbs}} g of carbs and {{target_fat}} g of fat. Give this in the form a table with days: 
         [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday] with meals being mandatory 
         [Breakfast, Afternoon Snack, Lunch, Evening Snack, Dinner]. Don't tell anything other than the table 
-        in the form of html table as mentioned. The foods should mainly belong to {cuisine} cuisine and should be {meal_choice}."""
+        in the form of html table as mentioned. The foods should mainly belong to {{cuisine}} cuisine and should be {{meal_choice}}."""
     )
     # with open("../configs/prompt.txt", "r") as file:
     #     prompt_template = file.read()
