@@ -57,7 +57,10 @@ async def get_chat_stream(request: Request):
         {{target_carbs}} g of carbs and {{target_fat}} g of fat. Give this in the form a table with days: 
         [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday] with meals being mandatory 
         [Breakfast, Afternoon Snack, Lunch, Evening Snack, Dinner]. Don't tell anything other than the table 
-        in the form of html table as mentioned. The foods should mainly belong to {{cuisine}} cuisine and should be {{meal_choice}}."""
+        in the form of html table as mentioned. The foods should mainly belong to {{cuisine}} cuisine and should be {{meal_choice}},
+        keeping in mind the occupation of the person as an {{occupation}}. The person has {{allergies}} allergies and
+        other preferences include {{other_preferences}}. The person prefers a {{variety}} variety of foods and has a
+        {{budget}} budget. The meal plan should be for a week."""
     )
     # with open("../configs/prompt.txt", "r") as file:
     #     prompt_template = file.read()
