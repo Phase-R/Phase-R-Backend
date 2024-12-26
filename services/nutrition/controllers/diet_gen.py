@@ -2,7 +2,7 @@ import asyncio
 import json
 
 import ollama
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -67,6 +67,9 @@ async def get_chat_stream(request: Request):
 
     params = await request.json()
 
+    if any(v in ["", "unknown"] for v in params.values()) or any(k not in params for k in DietParams.model_fields):
+        raise HTTPException(status_code=422, detail="Invalid parameters", headers={"X-Error": "Some invalid parameters were found!!!"})
+
     message = prompt_template.format(
         plan=params.get("plan"),
         activity=params.get("activity"),
@@ -84,7 +87,6 @@ async def get_chat_stream(request: Request):
     )
 
     return StreamingResponse(chat_stream(message), media_type="text/event-stream")
-
 
 if __name__ == "__main__":
     import uvicorn
