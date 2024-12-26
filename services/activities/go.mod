@@ -1,6 +1,9 @@
 module github.com/Phase-R/Phase-R-Backend/activities
 
 go 1.23.1
+go 1.22.4
+
+toolchain go1.23.4
 
 require (
 	github.com/Phase-R/Phase-R-Backend/db v0.0.0-20241117140606-b8770374c380
@@ -9,6 +12,8 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/nrednav/cuid2 v1.0.1
+	gorm.io/gorm v1.25.12
+	github.com/nrednav/cuid2 v1.0.0
 	gorm.io/gorm v1.25.12
 )
 
