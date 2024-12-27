@@ -22,7 +22,12 @@ jobs:
 
             - name: Create .env file
               run: |
+                echo "${{ secrets.ENV_FILE }}" >> services/activities/tests/.env
+                echo "${{ secrets.ENV_FILE }}" >> services/auth/tests/.env
+                echo "${{ secrets.ENV_FILE }}" >> services/gym/tests/.env
+                echo "${{ secrets.ENV_FILE }}" >> services/mental_health/tests/.env
                 echo "${{ secrets.ENV_FILE }}" >> services/nutrition/tests/.env
+                echo "${{ secrets.ENV_FILE }}" >> services/payments/tests/.env
 
             - name: Install dependencies
               run: |
