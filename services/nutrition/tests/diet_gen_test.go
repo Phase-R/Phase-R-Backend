@@ -1,44 +1,95 @@
-package controllers_test
+package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/Phase-R/Phase-R-Backend/services/nutrition/controllers"
-	"github.com/gin-gonic/gin"
 )
 
-func TestDietGenProxy(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := gin.Default()
-	router.GET("/proxy", controllers.DietGenProxy)
+// Mock valid diet params
+func validDietParams() map[string]string {
+	return map[string]string{
+		"plan":             "weight loss",
+		"activity":         "moderate",
+		"target_cal":       "2000",
+		"target_protein":   "150",
+		"target_fat":       "70",
+		"target_carbs":     "250",
+		"cuisine":          "Italian",
+		"meal_choice":      "vegetarian",
+		"occupation":       "office worker",
+		"allergies":        "none",
+		"other_preferences": "low sugar",
+		"variety":          "high",
+		"budget":           "medium",
+	}
+}
 
-	t.Run("Valid Request", func(t *testing.T) {
-		req, err := http.NewRequest(http.MethodGet, "/proxy", nil)
-		if err != nil {
-			t.Fatalf("Couldn't create request: %v\n", err)
-		}
+// Mock invalid diet params
+func invalidDietParams() map[string]string {
+	return map[string]string{
+		"plan":             "",
+		"activity":         "unknown",
+		"target_cal":       "not_a_number",
+		"target_protein":   "-10",
+		"target_fat":       "70",
+		"target_carbs":     "250",
+		"cuisine":          "Unknown",
+		"meal_choice":      "unknown",
+		"occupation":       "unknown",
+		"allergies":        "none",
+		"other_preferences": "none",
+		"variety":          "unknown",
+		"budget":           "unknown",
+	}
+}
 
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+func TestGenerateDietValidParams(t *testing.T) {
+	// Serialize valid params to JSON
+	params, _ := json.Marshal(validDietParams())
 
-		if w.Code != http.StatusOK {
-			t.Fatalf("Expected status 200 but got %d\n", w.Code)
-		}
-	})
+	req, _ := http.NewRequest("POST", "/generate_diet", bytes.NewBuffer(params))
+	req.Header.Set("Content-Type", "application/json")
+	
+	// Mock HTTP server
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(Monthly_Diet_Gen)
 
-	t.Run("Invalid Method", func(t *testing.T) {
-		req, err := http.NewRequest(http.MethodPost, "/proxy", nil)
-		if err != nil {
-			t.Fatalf("Couldn't create request: %v\n", err)
-		}
+	handler.ServeHTTP(rr, req)
 
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
 
-		if w.Code != http.StatusMethodNotAllowed {
-			t.Fatalf("Expected status 405 but got %d\n", w.Code)
-		}
-	})
+func TestGenerateDietInvalidParams(t *testing.T) {
+	params, _ := json.Marshal(invalidDietParams())
+
+	req, _ := http.NewRequest("POST", "/generate_diet", bytes.NewBuffer(params))
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(Monthly_Diet_Gen)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusUnprocessableEntity {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusUnprocessableEntity)
+	}
+}
+
+func TestGenerateDietMissingParams(t *testing.T) {
+	req, _ := http.NewRequest("POST", "/generate_diet", bytes.NewBuffer([]byte("{}")))
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(Monthly_Diet_Gen)
+
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusUnprocessableEntity {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusUnprocessableEntity)
+	}
 }
