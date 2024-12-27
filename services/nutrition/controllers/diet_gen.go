@@ -57,7 +57,7 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 		log.Fatal("Error loading .env file!")
 	}
 	// ctx.JSON(http.StatusAccepted, gin.H{"message": "Hello World!"})
-	api_key := os.Getenv("GITHUB_TOKEN")
+	api_key := os.Getenv("MODEL_TOKEN")
 
 	client := openai.NewClient(
 		option.WithAPIKey(api_key),
