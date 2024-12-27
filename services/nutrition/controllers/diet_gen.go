@@ -4,11 +4,9 @@ import (
 	"os"
 	"log"
 	"bytes"
+	"errors"
 	"context"
 	"net/http"
-	// "sync"
-
-	// "errors"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -34,14 +32,22 @@ type DietParams struct {
 }
 
 type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role	string	`json:"role"`
+	Content	string	`json:"content"`
 }
 
-type ModelResponse struct {
-	Model   string `json:"model"`
-	Content string `json:"content"`
-	Error   string `json:"error,omitempty"`
+func validateParams(params DietParams) error {
+	// Check for invalid or missing values
+	for _, v := range []string{
+		params.Plan, params.Activity, params.TargetCal, params.TargetProtein,
+		params.TargetFat, params.TargetCarbs, params.Cuisine, params.MealChoice,
+		params.Occupation, params.Allergies, params.OtherPreferences, params.Variety, params.Budget,
+	} {
+		if v == "" || v == "unknown" {
+			return errors.New("some parameters are invalid or missing")
+		}
+	}
+	return nil
 }
 
 func Monthly_Diet_Gen(ctx *gin.Context) {
@@ -73,6 +79,14 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 		return
 	}
 
+	if err := validateParams(params); err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   err.Error(),
+			"headers": gin.H{"X-Error": "Some invalid parameters were found!!!"},
+		})
+		return
+	}
+
 	tmp, err := template.New("prompt").Parse(promptTemplate)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse template!"})
@@ -86,28 +100,16 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 		return
 	}
 
-	model := "gpt-4o"
-	respChan := make(chan ModelResponse, 5)
-	// var wg sync.WaitGroup
-
-	go func(model string) {
-		chatCompletion, err := client.Chat.Completions.New(context.TODO(), openai.ChatCompletionNewParams{
-			Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
-				openai.UserMessage(finalPrompt.String()),
-			}),
-			Model: openai.F(model),
-		})
-		if err != nil {
-			respChan <- ModelResponse{
-				Model:   model,
-				Content: "",
-				Error:   err.Error(),
-			}
-			return
-		}
-		respChan <- ModelResponse{
-			Model:   model,
-			Content: chatCompletion.Choices[0].Message.Content,
-		}
-	}(model)
+	chatCompletion, err := client.Chat.Completions.New(context.TODO(), openai.ChatCompletionNewParams{
+		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
+			openai.UserMessage(finalPrompt.String()),
+		}),
+		Model: openai.F("gpt-4o"),
+	})
+	if err != nil {
+		panic(err.Error())
+	}
+	
+	response := chatCompletion.Choices[0].Message.Content
+	ctx.JSON(http.StatusOK, gin.H{"message": response})
 }
