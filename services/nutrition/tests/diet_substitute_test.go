@@ -13,7 +13,7 @@ import (
 
 func setUpRouter() *gin.Engine {
 	router := gin.Default()
-	router.POST("/substitute", controllers.Substitute)
+	router.POST("/substitute", controllers.Diet_Sub)
 	return router
 }
 

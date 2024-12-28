@@ -17,6 +17,6 @@ func main() {
 	r.Use(cors.New(config))
 
 	r.POST("/monthly_diet_gen", controllers.Monthly_Diet_Gen)
-	r.POST("/substitute", controllers.Substitute)
+	r.POST("/substitute", controllers.Diet_Sub)
 	r.Run()
 }
