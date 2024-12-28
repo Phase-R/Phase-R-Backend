@@ -58,22 +58,15 @@ func TestSubstituteInvalidParams(t *testing.T) {
 
 	router.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusBadRequest)
+	if status := rr.Code; status != http.StatusUnprocessableEntity {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusUnprocessableEntity)
 	}
 }
 
 func TestSubstituteMissingParams(t *testing.T) {
 	router := setUpRouter()
 
-	params := map[string]string{
-		"food":              "chicken tikka masala",
-		"allergies":         "mushrooms",
-	}
-
-	body, _ := json.Marshal(params)
-
-	req, _ := http.NewRequest("POST", "/substitute", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/substitute", bytes.NewBufferString(""))
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()

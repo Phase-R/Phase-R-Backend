@@ -82,12 +82,20 @@ func Diet_Sub(ctx *gin.Context) {
 		option.WithBaseURL("https://models.inference.ai.azure.com"),
 	)
 
-	const promptTemplate = `Generate an alternate food for {{.Food}} with a similar nutritional profile. The food should be suitable for someone with {{.Allergies}} allergies and {{.OtherPreferences}} preferences.`
+	const promptTemplate = `Generate an alternate food for {{.Food}} with a similar nutritional profile. The food should be suitable for someone with {{.Allergies}} allergies and {{.OtherPreferences}} preferences. Mention only the dish and nothing else.`
 	
 	var params SubstituteParams
 
 	if err := ctx.ShouldBindJSON(&params); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input!"})
+		return
+	}
+
+	if err := validateSubstituteParams(params); err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   err.Error(),
+			"headers": gin.H{"X-Error": "Some invalid parameters were found!!!"},
+		})
 		return
 	}
 
