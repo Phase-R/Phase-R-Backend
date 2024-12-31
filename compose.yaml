@@ -1,1 +1,50 @@
-h 
+services:
+  # activities:
+  #   build: ./services/activities
+  #   env_file:
+  #     - ./services/activities/.env
+  #   ports:
+  #     - "8081:8080"
+
+  auth:
+    build: ./services/auth
+    env_file:
+      - ./services/auth/.env
+    ports:
+      - "8082:8080"
+
+  # gym:
+  #   build: ./services/gym
+  #   env_file:
+  #     - ./services/gym/.env
+  #   ports:
+  #     - "8083:8080"
+
+  mental_health:
+    build: ./services/mental_health
+    env_file:
+      - ./services/mental_health/.env
+    ports:
+      - "8084:8080"
+
+  # nutrition:
+  #   build: ./services/nutrition
+  #   env_file:
+  #     - ./services/nutrition/.env
+  #   ports:
+  #     - "8085:8080"
+
+  nutrition:
+    build: .
+    ports:
+      - "9000:9000"
+    depends_on:
+      - ollama-model
+
+  ollama-model:
+    image: ollama/ollama:latest  # Assuming this is the correct image for Ollama
+    ports:
+      - "11434:11434"  # The port your Ollama model is running on
+    environment:
+      - MODEL=llama3  # Set the model to Llama3
+

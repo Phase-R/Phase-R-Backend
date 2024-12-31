@@ -11,18 +11,20 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("./.env")
 	if err != nil {								
 		log.Fatal("Error loading .env file")
 	}
 
 	r := gin.Default()
 	
-	config := cors.DefaultConfig()
-    config.AllowOrigins = []string{"http://localhost:3000"}
-    config.AllowHeaders = []string{"Content-Type"}
-	config.AllowCredentials = true
-    r.Use(cors.New(config))
+	// config := cors.DefaultConfig()
+    // config.AllowOrigins = []string{"https://phase-r.fit"}
+    // config.AllowHeaders = []string{"Content-Type"}
+	// config.AllowCredentials = true
+    // r.Use(cors.New(config))
+
+	r.Use(cors.Default())
 
 	db.Init()
 	r.POST("/user/new", controllers.CreateUser)
@@ -31,7 +33,7 @@ func main() {
 
 	r.POST("/user/forgot-password", controllers.ForgotPassword)			
 	r.POST("/user/reset-password", controllers.ResetPassword)
-	r.GET("/user/google/signin",controllers.BeginGoogleAuth)
-	r.GET("user/google/callback", controllers.OAuthCallback)
+	// r.GET("/user/google/signin",controllers.BeginGoogleAuth)
+	// r.GET("user/google/callback", controllers.OAuthCallback)
 	r.Run()
 }

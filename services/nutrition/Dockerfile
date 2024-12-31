@@ -1,16 +1,11 @@
-# Dockerfile
-FROM golang:1.23
+FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY go.* ./
-RUN go mod download
-COPY main.go ./
+COPY . /app/
 
-COPY . .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-RUN go build -o main main.go
+EXPOSE 9000
 
-EXPOSE 8080
-
-CMD ["./main"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9000"]
