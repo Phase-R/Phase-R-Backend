@@ -17,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Pydantic model to define the expected request body structure
 class DietParams(BaseModel):
     plan: str
