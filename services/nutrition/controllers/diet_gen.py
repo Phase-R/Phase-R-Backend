@@ -20,20 +20,25 @@ app.add_middleware(
 
 # Pydantic model to define the expected request body structure
 class DietParams(BaseModel):
-    plan: str
-    activity: str
+    height: int
+    weight: int
+    age: int
+    bmi: int
+    gender: str
+    goal: str # was previously named plan, choices: weight loss, muscle gain
+    activity_level: str
+    duration: int
     target_cal: str
     target_protein: str
     target_fat: str
     target_carbs: str
     cuisine: str
-    meal_choice: str
-    occupation: str
+    meal_choice: str # veg, non-veg, vegan, gluten-free, dairy-free, sugarless, jain, nut-free
+    # occupation: str
     allergies: str
     other_preferences: str
     variety: str
-    budget: str
-
+    # budget: str
 
 async def chat_stream(message: str):
     messages = [{"role": "user", "content": message}]
