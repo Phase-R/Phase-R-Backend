@@ -22,11 +22,11 @@ type DietParams struct {
 	BMI              int    `json:"bmi"`
 	Goal             string `json:"goal"`
 	ActivityLevel    string `json:"activity_level"`
-	Duration         string `json:"duration"`
-	TargetCal        string `json:"target_cal"`
-	TargetProtein    string `json:"target_protein"`
-	TargetFat        string `json:"target_fat"`
-	TargetCarbs      string `json:"target_carbs"`
+	Duration         int    `json:"duration"`
+	TargetCal        int    `json:"target_cal"`
+	TargetProtein    int    `json:"target_protein"`
+	TargetFat        int    `json:"target_fat"`
+	TargetCarbs      int    `json:"target_carbs"`
 	Cuisine          string `json:"cuisine"`
 	MealChoice       string `json:"meal_choice"`
 	Allergies        string `json:"allergies"`
@@ -60,8 +60,7 @@ func validateSubstituteParams(params SubstituteParams) error {
 func validateDietParams(params DietParams) error {
 	// Check for invalid or missing values
 	for _, v := range []string{
-		params.Goal, params.ActivityLevel, params.TargetCal, params.TargetProtein,
-		params.TargetFat, params.TargetCarbs, params.Cuisine, params.MealChoice,
+		params.Goal, params.ActivityLevel, params.Cuisine, params.MealChoice,
 		params.Allergies, params.OtherPreferences, params.Variety,
 	} {
 		if v == "" || v == "unknown" {
