@@ -33,6 +33,8 @@ type DietParams struct {
 	Allergies        string  `json:"allergies"`
 	OtherPreferences string  `json:"other_preferences"`
 	Variety          string  `json:"variety"`
+	NumberOfMeals    int     `json:"number_of_meals"`
+	MealTimings      []string `json:"meal_timings"`
 }
 
 type SubstituteParams struct {
@@ -46,18 +48,6 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func validateSubstituteParams(params SubstituteParams) error {
-	// Check for invalid or missing values
-	for _, v := range []string{
-		params.Food, params.Allergies, params.OtherPreferences,
-	} {
-		if v == "" || v == "unknown" {
-			return errors.New("some parameters are invalid or missing")
-		}
-	}
-	return nil
-}
-
 func validateDietParams(params DietParams) error {
 	// Check for invalid or missing values
 	for _, v := range []string{
@@ -68,66 +58,13 @@ func validateDietParams(params DietParams) error {
 			return errors.New("some parameters are invalid or missing")
 		}
 	}
+	if params.NumberOfMeals <= 0 {
+		return errors.New("number of meals must be greater than 0")
+	}
+	if len(params.MealTimings) != params.NumberOfMeals {
+		return errors.New("meal timings must match the number of meals")
+	}
 	return nil
-}
-
-func Diet_Sub(ctx *gin.Context) {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatal("Error loading .env file!")
-	}
-
-	api_key := os.Getenv("MODEL_TOKEN")
-
-	client := openai.NewClient(
-		option.WithAPIKey(api_key),
-		option.WithBaseURL("https://models.inference.ai.azure.com"),
-	)
-
-	const promptTemplate = `Generate an alternate food for {{.Food}} with a similar nutritional profile. The food should be suitable for someone with {{.Allergies}} allergies and {{.OtherPreferences}} preferences. Mention only the dish and nothing else.`
-
-	var params SubstituteParams
-
-	if err := ctx.ShouldBindJSON(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input!"})
-		return
-	}
-
-	if err := validateSubstituteParams(params); err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   err.Error(),
-			"headers": gin.H{"X-Error": "Some invalid parameters were found!!!"},
-		})
-		return
-	}
-
-	tmp, err := template.New("prompt").Parse(promptTemplate)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse template!"})
-		return
-	}
-
-	var finalPrompt bytes.Buffer
-	err = tmp.Execute(&finalPrompt, params)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse template!"})
-		return
-	}
-
-	chatCompletion, err := client.Chat.Completions.New(context.TODO(), openai.ChatCompletionNewParams{
-		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
-			openai.UserMessage(finalPrompt.String()),
-		}),
-		Model: openai.F("gpt-4o-mini"),
-	})
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	response := chatCompletion.Choices[0].Message.Content
-	ctx.JSON(http.StatusOK, gin.H{"message": response})
 }
 
 func Monthly_Diet_Gen(ctx *gin.Context) {
@@ -136,7 +73,7 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 	if err != nil {
 		log.Fatal("Error loading .env file!")
 	}
-	// ctx.JSON(http.StatusAccepted, gin.H{"message": "Hello World!"})
+
 	api_key := os.Getenv("MODEL_TOKEN")
 
 	client := openai.NewClient(
@@ -153,6 +90,8 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 
     Use foods from {{.Cuisine}} cuisine and follow the {{.MealChoice}} preference. Address any allergies specified: {{.Allergies}}. 
     Ensure {{.Variety}} variety across meals and adhere to these additional preferences: {{.OtherPreferences}}. 
+
+    The plan should include {{.NumberOfMeals}} meals per day, following these meal timings: {{.MealTimings}}. 
 
     Structure the meal plan over 7 days, and include the following five mandatory meals each day: 
     Breakfast, Afternoon Snack, Lunch, Evening Snack, and Dinner. 
@@ -172,7 +111,7 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
     ]
 
     Do not include any introduction, explanation, or content outside of the JSON.
-`
+	`
 
 	var params DietParams
 	if err := ctx.ShouldBindJSON(&params); err != nil {
