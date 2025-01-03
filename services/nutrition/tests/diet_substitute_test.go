@@ -20,7 +20,7 @@ func setUpRouter() *gin.Engine {
 func TestSubstituteValidParams(t *testing.T) {
 	router := setUpRouter()
 
-	params := map[string]string{
+	params := map[string]interface{}{
 		"food":              "chicken tikka masala",
 		"allergies":         "mushrooms",
 		"other_preferences": "high spice",
@@ -42,7 +42,7 @@ func TestSubstituteValidParams(t *testing.T) {
 func TestSubstituteInvalidParams(t *testing.T) {
 	router := setUpRouter()
 
-	params := map[string]string{
+	params := map[string]interface{}{
 		"food":              "",
 		"allergies":         "unknown",
 		"other_preferences": "unknown",
