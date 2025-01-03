@@ -30,6 +30,7 @@ type DietParams struct {
 	TargetCarbs      int     `json:"target_carbs"`
 	Cuisine          string  `json:"cuisine"`
 	MealChoice       string  `json:"meal_choice"`
+	NumberOfMeals    int     `json:"number_of_meals"`
 	Allergies        string  `json:"allergies"`
 	OtherPreferences string  `json:"other_preferences"`
 	Variety          string  `json:"variety"`
@@ -50,6 +51,36 @@ type Message struct {
 
 func validateDietParams(params DietParams) error {
 	// Check for invalid or missing values
+	if params.Height <= 0 {
+		return errors.New("height must be greater than 0")
+	}
+	if params.Weight <= 0 {
+		return errors.New("weight must be greater than 0")
+	}
+	if params.Age <= 0 {
+		return errors.New("age must be greater than 0")
+	}
+	if params.BMI <= 0 {
+		return errors.New("BMI must be greater than 0")
+	}
+	if params.Duration <= 0 {
+		return errors.New("duration must be greater than 0")
+	}
+	if params.TargetCal <= 0 {
+		return errors.New("target calories must be greater than 0")
+	}
+	if params.TargetProtein < 0 {
+		return errors.New("target protein must be 0 or greater")
+	}
+	if params.TargetFat < 0 {
+		return errors.New("target fat must be 0 or greater")
+	}
+	if params.TargetCarbs < 0 {
+		return errors.New("target carbs must be 0 or greater")
+	}
+	if params.NumberOfMeals <= 0 || params.NumberOfMeals > 5 {
+		return errors.New("number of meals must be between 1 and 5")
+	}
 	for _, v := range []string{
 		params.Gender, params.Goal, params.ActivityLevel, params.Cuisine, params.MealChoice,
 		params.Allergies, params.OtherPreferences, params.Variety,
