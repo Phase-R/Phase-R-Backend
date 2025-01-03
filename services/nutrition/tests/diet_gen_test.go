@@ -2,38 +2,45 @@ package main
 
 import (
 	"bytes"
-	"testing"
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
+	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Phase-R/Phase-R-Backend/services/nutrition/controllers"
+	"github.com/gin-gonic/gin"
 )
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 	router.POST("/monthly_diet_gen", controllers.Monthly_Diet_Gen)
+	router.POST("/substitute", controllers.Diet_Sub)
 	return router
 }
 
 func TestGenerateDietValidParams(t *testing.T) {
 	router := setupRouter()
 
-	params := map[string]string{
-		"plan":             "weight loss",
-		"activity":         "moderate",
-		"target_cal":       "2000",
-		"target_protein":   "150",
-		"target_fat":       "70",
-		"target_carbs":     "250",
-		"cuisine":          "Italian",
-		"meal_choice":      "vegetarian",
-		"occupation":       "office worker",
-		"allergies":        "none",
-		"other_preferences": "low sugar",
-		"variety":          "high",
-		"budget":           "medium",
+	params := map[string]interface{}{
+		"height":            180,
+		"weight":            75,
+		"age":               28,
+		"bmi":               23.1,
+		"goal":              "muscle_gain",
+		"gender":            "male",
+		"activity_level":    "high",
+		"duration":          12,
+		"target_cal":        3000,
+		"target_protein":    200,
+		"target_fat":        90,
+		"target_carbs":      330,
+		"cuisine":           "Mediterranean",
+		"meal_choice":       "non-vegetarian",
+		"allergies":         "none",
+		"other_preferences": "low sugar, high fiber",
+		"variety":           "high",
+		"number_of_meals":   5,
+		"meal_timings":      []string{"08:00 AM", "11:00 AM", "01:00 PM", "04:30 PM", "07:30 PM"},
 	}
 
 	body, _ := json.Marshal(params)
@@ -42,7 +49,6 @@ func TestGenerateDietValidParams(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -53,28 +59,34 @@ func TestGenerateDietValidParams(t *testing.T) {
 func TestGenerateDietInvalidParams(t *testing.T) {
 	router := setupRouter()
 
-	params := map[string]string{
-		"plan":             "",
-		"activity":         "unknown",
-		"target_cal":       "not_a_number",
-		"target_protein":   "-10",
-		"target_fat":       "70",
-		"target_carbs":     "250",
-		"cuisine":          "Unknown",
-		"meal_choice":      "unknown",
-		"occupation":       "unknown",
-		"allergies":        "none",
+	params := map[string]interface{}{
+		"height":            -1,
+		"weight":            -1,
+		"age":               -1,
+		"bmi":               -1,
+		"goal":              "",
+		"gender":            "unknown",
+		"activity_level":    "unknown",
+		"duration":          -1,
+		"target_cal":        -1,
+		"target_protein":    -1,
+		"target_fat":        -1,
+		"target_carbs":      -1,
+		"cuisine":           "unknown",
+		"meal_choice":       "unknown",
+		"allergies":         "none",
 		"other_preferences": "none",
-		"variety":          "unknown",
-		"budget":           "unknown",
+		"variety":           "unknown",
+		"number_of_meals":   0,
+		"meal_timings":      []string{},
 	}
+
 	body, _ := json.Marshal(params)
 
 	req, _ := http.NewRequest("POST", "/monthly_diet_gen", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusUnprocessableEntity {
@@ -89,7 +101,6 @@ func TestGenerateDietMissingParams(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusBadRequest {
