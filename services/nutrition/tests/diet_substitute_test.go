@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
-	"testing"
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
+	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Phase-R/Phase-R-Backend/services/nutrition/controllers"
+	"github.com/gin-gonic/gin"
 )
 
 func setUpRouter() *gin.Engine {
@@ -32,7 +32,6 @@ func TestSubstituteValidParams(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
@@ -55,7 +54,6 @@ func TestSubstituteInvalidParams(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusUnprocessableEntity {
@@ -70,7 +68,6 @@ func TestSubstituteMissingParams(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-
 	router.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusBadRequest {
