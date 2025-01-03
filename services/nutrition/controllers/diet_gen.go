@@ -30,7 +30,6 @@ type DietParams struct {
 	TargetCarbs      int     `json:"target_carbs"`
 	Cuisine          string  `json:"cuisine"`
 	MealChoice       string  `json:"meal_choice"`
-	NumberOfMeals    int     `json:"number_of_meals"`
 	Allergies        string  `json:"allergies"`
 	OtherPreferences string  `json:"other_preferences"`
 	Variety          string  `json:"variety"`
