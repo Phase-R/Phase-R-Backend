@@ -22,23 +22,25 @@ func TestGenerateDietValidParams(t *testing.T) {
 	router := setupRouter()
 
 	params := map[string]interface{}{
-		"height":            170,
-		"weight":            70,
-		"age":               30,
-		"bmi":               24.4,
-		"goal":              "weight loss",
+		"height":            180,
+		"weight":            75,
+		"age":               28,
+		"bmi":               23.1,
+		"goal":              "muscle_gain",
 		"gender":            "male",
-		"activity_level":    "moderate",
-		"duration":          4,
-		"target_cal":        2000,
-		"target_protein":    150,
-		"target_fat":        70,
-		"target_carbs":      250,
-		"cuisine":           "Italian",
-		"meal_choice":       "vegetarian",
+		"activity_level":    "high",
+		"duration":          12,
+		"target_cal":        3000,
+		"target_protein":    200,
+		"target_fat":        90,
+		"target_carbs":      330,
+		"cuisine":           "Mediterranean",
+		"meal_choice":       "non-vegetarian",
 		"allergies":         "none",
-		"other_preferences": "low sugar",
+		"other_preferences": "low sugar, high fiber",
 		"variety":           "high",
+		"number_of_meals":   5,
+		"meal_timings":      []string{"08:00 AM", "11:00 AM", "01:00 PM", "04:30 PM", "07:30 PM"},
 	}
 
 	body, _ := json.Marshal(params)
@@ -70,11 +72,13 @@ func TestGenerateDietInvalidParams(t *testing.T) {
 		"target_protein":    -1,
 		"target_fat":        -1,
 		"target_carbs":      -1,
-		"cuisine":           "Unknown",
+		"cuisine":           "unknown",
 		"meal_choice":       "unknown",
 		"allergies":         "none",
 		"other_preferences": "none",
 		"variety":           "unknown",
+		"number_of_meals":   0,
+		"meal_timings":      []string{},
 	}
 
 	body, _ := json.Marshal(params)
