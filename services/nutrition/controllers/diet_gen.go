@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"os"
-	"log"
 	"bytes"
-	"errors"
 	"context"
+	"errors"
+	"log"
 	"net/http"
+	"os"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -16,30 +16,33 @@ import (
 )
 
 type DietParams struct {
-	Plan             string `json:"plan"`
-	Activity         string `json:"activity"`
+	Height           int    `json:"height"`
+	Weight           int    `json:"weight"`
+	Age              int    `json:"age"`
+	BMI              int    `json:"bmi"`
+	Goal             string `json:"goal"`
+	ActivityLevel    string `json:"activity_level"`
+	Duration         string `json:"duration"`
 	TargetCal        string `json:"target_cal"`
 	TargetProtein    string `json:"target_protein"`
 	TargetFat        string `json:"target_fat"`
 	TargetCarbs      string `json:"target_carbs"`
 	Cuisine          string `json:"cuisine"`
 	MealChoice       string `json:"meal_choice"`
-	Occupation       string `json:"occupation"`
 	Allergies        string `json:"allergies"`
 	OtherPreferences string `json:"other_preferences"`
 	Variety          string `json:"variety"`
-	Budget           string `json:"budget"`
 }
 
 type SubstituteParams struct {
-	Food				string	`json:"food"`
-	Allergies			string	`json:"allergies"`
-	OtherPreferences	string	`json:"other_preferences"`
+	Food             string `json:"food"`
+	Allergies        string `json:"allergies"`
+	OtherPreferences string `json:"other_preferences"`
 }
 
 type Message struct {
-	Role	string	`json:"role"`
-	Content	string	`json:"content"`
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 func validateSubstituteParams(params SubstituteParams) error {
@@ -57,9 +60,9 @@ func validateSubstituteParams(params SubstituteParams) error {
 func validateDietParams(params DietParams) error {
 	// Check for invalid or missing values
 	for _, v := range []string{
-		params.Plan, params.Activity, params.TargetCal, params.TargetProtein,
+		params.Goal, params.ActivityLevel, params.TargetCal, params.TargetProtein,
 		params.TargetFat, params.TargetCarbs, params.Cuisine, params.MealChoice,
-		params.Occupation, params.Allergies, params.OtherPreferences, params.Variety, params.Budget,
+		params.Allergies, params.OtherPreferences, params.Variety,
 	} {
 		if v == "" || v == "unknown" {
 			return errors.New("some parameters are invalid or missing")
@@ -83,7 +86,7 @@ func Diet_Sub(ctx *gin.Context) {
 	)
 
 	const promptTemplate = `Generate an alternate food for {{.Food}} with a similar nutritional profile. The food should be suitable for someone with {{.Allergies}} allergies and {{.OtherPreferences}} preferences. Mention only the dish and nothing else.`
-	
+
 	var params SubstituteParams
 
 	if err := ctx.ShouldBindJSON(&params); err != nil {
@@ -142,13 +145,34 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 	)
 
 	const promptTemplate = `
-	Generate a meal plan for {{.Plan}} with a daily activity level being {{.Activity}}.
-	Target calories: {{.TargetCal}} kcal. Macro Distribution: {{.TargetProtein}} g protein, 
-	{{.TargetCarbs}} g of carbs and {{.TargetFat}} g of fat. Give this in the form of a table with days: 
-	[Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday] with meals being mandatory 
-	[Breakfast, Afternoon Snack, Lunch, Evening Snack, Dinner]. Don't tell anything other than the table 
-	in the form of HTML table as mentioned. The foods should mainly belong to {{.Cuisine}} cuisine and should be {{.MealChoice}}.
-	`
+    Generate a meal plan for a person with the following details: 
+    Height: {{.Height}} cm, Weight: {{.Weight}} kg, Age: {{.Age}} years, BMI: {{.BMI}}, Gender: {{.Gender}}, 
+    Goal: {{.Goal}}, Activity Level: {{.ActivityLevel}}, and Duration: {{.Duration}} weeks. 
+    The plan should target {{.TargetCal}} kcal daily with a macro distribution of 
+    {{.TargetProtein}} g of protein, {{.TargetCarbs}} g of carbs, and {{.TargetFat}} g of fat. 
+
+    Use foods from {{.Cuisine}} cuisine and follow the {{.MealChoice}} preference. Address any allergies specified: {{.Allergies}}. 
+    Ensure {{.Variety}} variety across meals and adhere to these additional preferences: {{.OtherPreferences}}. 
+
+    Structure the meal plan over 7 days, and include the following five mandatory meals each day: 
+    Breakfast, Afternoon Snack, Lunch, Evening Snack, and Dinner. 
+    Output the meal plan as a JSON in the following format: 
+
+    [
+      {
+        "day1": [
+          {"Type": "Breakfast", "Time": "08:00 AM", "Cals": 400, "Foods": []}, 
+          {"Type": "Afternoon Snack", "Time": "11:00 AM", "Cals": 200, "Foods": []}, 
+          {"Type": "Lunch", "Time": "01:00 PM", "Cals": 600, "Foods": []}, 
+          {"Type": "Evening Snack", "Time": "04:30 PM", "Cals": 200, "Foods": []}, 
+          {"Type": "Dinner", "Time": "07:30 PM", "Cals": 500, "Foods": []}
+        ]
+      },
+      ... 
+    ]
+
+    Do not include any introduction, explanation, or content outside of the JSON.
+`
 
 	var params DietParams
 	if err := ctx.ShouldBindJSON(&params); err != nil {
@@ -186,7 +210,7 @@ func Monthly_Diet_Gen(ctx *gin.Context) {
 	if err != nil {
 		panic(err.Error())
 	}
-	
+
 	response := chatCompletion.Choices[0].Message.Content
 	ctx.JSON(http.StatusOK, gin.H{"message": response})
 }
