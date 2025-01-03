@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
-	"testing"
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
+	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Phase-R/Phase-R-Backend/services/nutrition/controllers"
+	"github.com/gin-gonic/gin"
 )
 
 func setupRouter() *gin.Engine {
@@ -20,20 +20,24 @@ func setupRouter() *gin.Engine {
 func TestGenerateDietValidParams(t *testing.T) {
 	router := setupRouter()
 
-	params := map[string]string{
-		"plan":             "weight loss",
-		"activity":         "moderate",
-		"target_cal":       "2000",
-		"target_protein":   "150",
-		"target_fat":       "70",
-		"target_carbs":     "250",
-		"cuisine":          "Italian",
-		"meal_choice":      "vegetarian",
-		"occupation":       "office worker",
-		"allergies":        "none",
+	params := map[string]interface{}{
+		"height":            170,
+		"weight":            70,
+		"age":               30,
+		"bmi":               24.2,
+		"gender":            "male",
+		"goal":              "weight loss",
+		"activity_level":    "moderate",
+		"duration":          4,
+		"target_cal":        2000,
+		"target_protein":    150,
+		"target_fat":        70,
+		"target_carbs":      250,
+		"cuisine":           "Italian",
+		"meal_choice":       "vegetarian",
+		"allergies":         "none",
 		"other_preferences": "low sugar",
-		"variety":          "high",
-		"budget":           "medium",
+		"variety":           "high",
 	}
 
 	body, _ := json.Marshal(params)
@@ -53,20 +57,24 @@ func TestGenerateDietValidParams(t *testing.T) {
 func TestGenerateDietInvalidParams(t *testing.T) {
 	router := setupRouter()
 
-	params := map[string]string{
-		"plan":             "",
-		"activity":         "unknown",
-		"target_cal":       "not_a_number",
-		"target_protein":   "-10",
-		"target_fat":       "70",
-		"target_carbs":     "250",
-		"cuisine":          "Unknown",
-		"meal_choice":      "unknown",
-		"occupation":       "unknown",
-		"allergies":        "none",
+	params := map[string]interface{}{
+		"height":            0,
+		"weight":            -1,
+		"age":               -5,
+		"bmi":               -1,
+		"gender":            "unknown",
+		"goal":              "",
+		"activity_level":    "unknown",
+		"duration":          -1,
+		"target_cal":        "not_a_number",
+		"target_protein":    -10,
+		"target_fat":        70,
+		"target_carbs":      250,
+		"cuisine":           "Unknown",
+		"meal_choice":       "unknown",
+		"allergies":         "none",
 		"other_preferences": "none",
-		"variety":          "unknown",
-		"budget":           "unknown",
+		"variety":           "unknown",
 	}
 	body, _ := json.Marshal(params)
 
